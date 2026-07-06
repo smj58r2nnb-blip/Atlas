@@ -4,49 +4,46 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Atlas Earth Calculator</title>
-    <!-- Include Tesseract.js for client-side OCR -->
     <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
     <style>
-        :root {
-            --bg-color: #f4f4f9;
-            --card-bg: #ffffff;
-            --primary-color: #2c3e50;
-            --accent-green: #4CAF50;
-            --accent-blue: #2196F3;
-            --border-radius: 10px;
+        /* This fixes the overflow issue */
+        * {
+            box-sizing: border-box;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
         }
 
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: var(--bg-color);
+            background-color: #f8f9fa;
             margin: 0;
             padding: 15px;
-            color: var(--primary-color);
+            color: #333;
+            display: flex;
+            justify-content: center;
         }
 
         .container {
-            max-width: 500px;
-            margin: 0 auto;
-            background: var(--card-bg);
-            padding: 20px;
-            border-radius: var(--border-radius);
-            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+            width: 100%;
+            max-width: 400px;
+            background: #ffffff;
+            padding: 24px;
+            border-radius: 12px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.08);
         }
 
         h1 {
             text-align: center;
-            font-size: 1.5rem;
-            margin-top: 0;
-            color: var(--accent-green);
+            font-size: 1.4rem;
+            margin: 0 0 20px 0;
+            color: #2c3e50;
         }
 
         .upload-section {
-            background: #e3f2fd;
-            border: 2px dashed var(--accent-blue);
-            padding: 20px;
+            background: #f1f3f5;
+            border: 2px dashed #adb5bd;
+            padding: 16px;
             text-align: center;
-            border-radius: var(--border-radius);
-            margin-bottom: 20px;
+            border-radius: 8px;
+            margin-bottom: 24px;
         }
 
         .upload-section input[type="file"] {
@@ -54,28 +51,31 @@
         }
 
         .upload-btn {
-            background-color: var(--accent-blue);
+            background-color: #4CAF50;
             color: white;
-            padding: 10px 20px;
-            border-radius: 5px;
+            padding: 10px 16px;
+            border-radius: 6px;
             cursor: pointer;
-            font-weight: bold;
+            font-weight: 600;
+            font-size: 0.9rem;
             display: inline-block;
             text-transform: uppercase;
+            letter-spacing: 0.5px;
+            width: 100%;
         }
 
         #status {
-            margin-top: 10px;
-            font-size: 0.9rem;
-            font-weight: bold;
-            color: #555;
+            margin-top: 12px;
+            font-size: 0.85rem;
+            font-weight: 500;
+            color: #6c757d;
         }
 
         .input-grid {
             display: grid;
             grid-template-columns: 1fr 1fr;
-            gap: 15px;
-            margin-bottom: 20px;
+            gap: 16px;
+            margin-bottom: 24px;
         }
 
         .input-group {
@@ -83,104 +83,118 @@
             flex-direction: column;
         }
 
-        label {
-            font-size: 0.85rem;
-            font-weight: 600;
-            margin-bottom: 5px;
-            text-transform: uppercase;
-        }
-
-        input[type="number"] {
-            padding: 10px;
-            font-size: 1rem;
-            border: 1px solid #ddd;
-            border-radius: 5px;
-            text-align: center;
-        }
-
         .full-width {
             grid-column: span 2;
         }
 
-        button {
-            width: 100%;
-            padding: 12px;
-            background-color: var(--accent-green);
-            color: white;
-            border: none;
-            border-radius: 5px;
-            font-size: 1rem;
-            font-weight: bold;
-            cursor: pointer;
+        label {
+            font-size: 0.8rem;
+            font-weight: 700;
+            margin-bottom: 6px;
             text-transform: uppercase;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            letter-spacing: 0.5px;
         }
 
-        button:active {
-            background-color: #45a049;
-            transform: translateY(1px);
+        input[type="number"] {
+            width: 100%;
+            padding: 12px;
+            font-size: 1rem;
+            border: 1px solid #ced4da;
+            border-radius: 6px;
+            text-align: center;
+            background-color: #fff;
+            transition: border-color 0.2s;
+        }
+
+        input[type="number"]:focus {
+            outline: none;
+            border-color: #4CAF50;
+        }
+
+        button.calc-btn {
+            width: 100%;
+            padding: 14px;
+            background-color: #2c3e50;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 1rem;
+            font-weight: 700;
+            cursor: pointer;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
         }
 
         .results {
-            margin-top: 20px;
-            padding: 15px;
-            background: #e8f5e9;
-            border-radius: var(--border-radius);
-            border: 1px solid #c8e6c9;
+            margin-top: 24px;
+            padding: 16px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            border: 1px solid #e9ecef;
         }
 
         .result-row {
             display: flex;
             justify-content: space-between;
-            padding: 10px 0;
-            border-bottom: 1px solid #c8e6c9;
-            font-size: 1rem;
+            padding: 8px 0;
+            font-size: 0.95rem;
+            border-bottom: 1px solid #e9ecef;
         }
 
         .result-row:last-child {
             border-bottom: none;
-            font-weight: bold;
-            color: var(--accent-green);
+            padding-bottom: 0;
+            font-weight: 700;
+            font-size: 1.1rem;
+            color: #4CAF50;
+            padding-top: 12px;
         }
+
+        /* Label Colors */
+        .lbl-common { color: #4CAF50; }
+        .lbl-rare { color: #2196F3; }
+        .lbl-epic { color: #9C27B0; }
+        .lbl-legendary { color: #FFC107; }
+        .lbl-boost { color: #343a40; }
     </style>
 </head>
 <body>
 
     <div class="container">
-        <h1>Atlas Earth Earnings</h1>
+        <h1>Atlas Earnings</h1>
 
         <div class="upload-section">
             <label class="upload-btn">
                 Upload Screenshot
-                <input type="file" id="imageInput" accept="image/*" onchange="processImage(event)">
+                <input type="file" accept="image/*" onchange="processImage(event)">
             </label>
-            <div id="status">Upload your player profile to auto-fill stats</div>
+            <div id="status">Auto-fill your stats</div>
         </div>
         
         <div class="input-grid">
             <div class="input-group">
-                <label style="color: #4CAF50;">Common</label>
+                <label class="lbl-common">Common</label>
                 <input type="number" id="common" value="0" min="0">
             </div>
             <div class="input-group">
-                <label style="color: #2196F3;">Rare</label>
+                <label class="lbl-rare">Rare</label>
                 <input type="number" id="rare" value="0" min="0">
             </div>
             <div class="input-group">
-                <label style="color: #9C27B0;">Epic</label>
+                <label class="lbl-epic">Epic</label>
                 <input type="number" id="epic" value="0" min="0">
             </div>
             <div class="input-group">
-                <label style="color: #FFC107;">Legendary</label>
+                <label class="lbl-legendary">Legend</label>
                 <input type="number" id="legendary" value="0" min="0">
             </div>
             <div class="input-group full-width">
-                <label>Badge Boost (%)</label>
+                <label class="lbl-boost">Badge Boost (%)</label>
                 <input type="number" id="boost" value="0" min="0">
             </div>
         </div>
 
-        <button onclick="calculateEarnings()">Calculate Earnings</button>
+        <button class="calc-btn" onclick="calculateEarnings()">Calculate</button>
 
         <div class="results" id="results" style="display: none;">
             <div class="result-row">
@@ -192,7 +206,7 @@
                 <span id="res-week">$0.00</span>
             </div>
             <div class="result-row">
-                <span>Per Month (30 Days):</span>
+                <span>Per Month:</span>
                 <span id="res-month">$0.00</span>
             </div>
             <div class="result-row">
@@ -210,45 +224,46 @@
             legendary: 0.0000000044
         };
 
-        // Function to process the uploaded image using Tesseract.js
         async function processImage(event) {
             const file = event.target.files[0];
             if (!file) return;
 
             const statusEl = document.getElementById('status');
-            statusEl.textContent = "Processing image... Please wait (this takes a few seconds).";
+            statusEl.textContent = "Scanning image...";
             statusEl.style.color = "#FF9800";
 
             try {
-                // Initialize Tesseract and recognize text
                 const result = await Tesseract.recognize(file, 'eng');
                 const text = result.data.text.toUpperCase();
                 
-                // Parse the text using Regular Expressions
-                // Looking for patterns like "52 COMMON" or "Badges:10% Boost"
-                const commonMatch = text.match(/(\d+)\s*COMMON/);
-                const rareMatch = text.match(/(\d+)\s*RARE/);
-                const epicMatch = text.match(/(\d+)\s*EPIC/);
-                const legMatch = text.match(/(\d+)\s*LEGENDARY/);
-                const boostMatch = text.match(/BADGES:\s*(\d+)%/); // Made uppercase for the regex
+                // Updated Regex to account for line breaks between the number and the label
+                const commonMatch = text.match(/(\d+)[\s\n]*COMMON/);
+                const rareMatch = text.match(/(\d+)[\s\n]*RARE/);
+                const epicMatch = text.match(/(\d+)[\s\n]*EPIC/);
+                const legMatch = text.match(/(\d+)[\s\n]*LEGENDARY/);
+                const boostMatch = text.match(/BADGES:\s*(\d+)%/);
 
-                // Update inputs if matches are found
-                if (commonMatch) document.getElementById('common').value = commonMatch[1];
-                if (rareMatch) document.getElementById('rare').value = rareMatch[1];
-                if (epicMatch) document.getElementById('epic').value = epicMatch[1];
-                if (legMatch) document.getElementById('legendary').value = legMatch[1];
-                if (boostMatch) document.getElementById('boost').value = boostMatch[1];
+                let updated = false;
 
-                statusEl.textContent = "Stats updated successfully!";
-                statusEl.style.color = "#4CAF50";
+                if (commonMatch) { document.getElementById('common').value = commonMatch[1]; updated = true; }
+                if (rareMatch) { document.getElementById('rare').value = rareMatch[1]; updated = true; }
+                if (epicMatch) { document.getElementById('epic').value = epicMatch[1]; updated = true; }
+                if (legMatch) { document.getElementById('legendary').value = legMatch[1]; updated = true; }
+                if (boostMatch) { document.getElementById('boost').value = boostMatch[1]; updated = true; }
 
-                // Automatically calculate after successful parse
-                calculateEarnings();
+                if (updated) {
+                    statusEl.textContent = "Stats updated!";
+                    statusEl.style.color = "#4CAF50";
+                    calculateEarnings();
+                } else {
+                    statusEl.textContent = "Couldn't find numbers. Please enter manually.";
+                    statusEl.style.color = "#e53935";
+                }
 
             } catch (error) {
                 console.error(error);
-                statusEl.textContent = "Error reading image. Please enter stats manually.";
-                statusEl.style.color = "#F44336";
+                statusEl.textContent = "Error reading image.";
+                statusEl.style.color = "#e53935";
             }
         }
 
@@ -259,23 +274,19 @@
             const legendary = parseInt(document.getElementById('legendary').value) || 0;
             const boostPercent = parseFloat(document.getElementById('boost').value) || 0;
 
-            // Calculate base rent per second
             let basePerSecond = 
                 (common * RATES.common) +
                 (rare * RATES.rare) +
                 (epic * RATES.epic) +
                 (legendary * RATES.legendary);
 
-            // Apply badge boost
             let boostedPerSecond = basePerSecond * (1 + (boostPercent / 100));
 
-            // Time multipliers
-            const perDay = boostedPerSecond * 86400; // 60 * 60 * 24
+            const perDay = boostedPerSecond * 86400;
             const perWeek = perDay * 7;
             const perMonth = perDay * 30;
-            const perYear = perDay * 365.25; // Account for leap years
+            const perYear = perDay * 365.25;
 
-            // Format and display
             document.getElementById('res-day').textContent = '$' + perDay.toFixed(4);
             document.getElementById('res-week').textContent = '$' + perWeek.toFixed(4);
             document.getElementById('res-month').textContent = '$' + perMonth.toFixed(2);
