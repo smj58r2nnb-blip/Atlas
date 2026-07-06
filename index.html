@@ -88,6 +88,11 @@
             justify-content: center; align-items: center; transition: width .3s;
             font-size: 0.9rem; white-space: nowrap;
         }
+        #debugBox {
+            display: none; margin-top: 20px; padding: 15px; background: rgba(0,0,0,0.4);
+            border-radius: 10px; font-size: 0.75rem; color: #ffeb3b; text-align: left;
+            word-wrap: break-word; overflow-y: auto; max-height: 150px;
+        }
         .toast {
             position: fixed; bottom: 30px; right: 30px; background: #00cc66;
             color: white; padding: 18px 24px; border-radius: 12px;
@@ -157,6 +162,7 @@
                 <h2>📸 Drop Screenshot Here</h2>
                 <p>or click above to browse</p>
                 <div id="progressContainer"><div id="progressBar">Ready to Scan</div></div>
+                <div id="debugBox"></div>
                 <img id="preview" style="display:none;">
             </div>
         </div>
@@ -364,10 +370,11 @@
         }
 
         // =======================================
-        // OCR Engine (Global Hunter)
+        // OCR Engine (Auto-Correcting Hunter)
         // =======================================
         const uploadInput = document.getElementById("upload");
         const dropArea = document.getElementById("dropArea");
+        const debugBox = document.getElementById("debugBox");
 
         function updateProgress(percent, text) {
             const bar = document.getElementById("progressBar");
@@ -391,6 +398,7 @@
             const preview = document.getElementById("preview");
             preview.src = URL.createObjectURL(file);
             preview.style.display = "block";
+            debugBox.style.display = "none";
             
             const bar = document.getElementById("progressBar");
             bar.style.background = "#00cc66";
@@ -413,10 +421,15 @@
             let moneyUpdated = false;
             let parcelsUpdated = false;
 
-            // 1. Hunt for Money (Two long decimals)
-            // Removes commas in case the scanner misreads spaces as commas
-            const cleanText = text.replace(/,/g, ''); 
-            const moneyMatches = [...cleanText.matchAll(/(\d+\.\d{5,})/g)].map(m => parseFloat(m[1]));
+            // --- 1. Hunt for Money (With Auto-Corrections) ---
+            // Tesseract frequently confuses letters and numbers in long 18-digit strings.
+            let mText = text.replace(/\s+/g, ''); // Strip all spaces
+            mText = mText.replace(/(\d),(\d)/g, '$1.$2'); // Fix commas read as decimals
+            mText = mText.replace(/[Oo]/g, '0'); // Fix capital O's read as 0's
+            mText = mText.replace(/[lIi]/g, '1'); // Fix L/I read as 1's
+            mText = mText.replace(/[sS$]/g, ''); // Strip dollar signs
+            
+            const moneyMatches = [...mText.matchAll(/(\d+\.\d{5,})/g)].map(m => parseFloat(m[1]));
             
             if (moneyMatches.length >= 2) {
                 stats.totalRent = Math.max(...moneyMatches);
@@ -431,7 +444,7 @@
                 moneyUpdated = true;
             }
 
-            // 2. Hunt for Parcels (Looks for keyword then number, or number then keyword)
+            // --- 2. Hunt for Parcels ---
             const find = (kw) => {
                 const regex = new RegExp(kw + "\\s*\\D*(\\d+)|(\\d+)\\s*" + kw, "i");
                 const match = text.match(regex);
@@ -443,10 +456,11 @@
             const e = find("EPIC"); if (e !== null) { stats.epic = e; parcelsUpdated = true; }
             const l = find("LEGENDARY"); if (l !== null) { stats.legendary = l; parcelsUpdated = true; }
 
-            // 3. Hunt for Boost
+            // --- 3. Hunt for Boost ---
             const bMatch = text.match(/(\d+)%\s*BOOST|BADGES:?\s*(\d+)%/i);
             if (bMatch) { stats.boost = parseInt(bMatch[1] || bMatch[2]); parcelsUpdated = true; }
 
+            // --- UI Updates & Feedback ---
             const bar = document.getElementById("progressBar");
             
             if (moneyUpdated || parcelsUpdated) {
@@ -469,12 +483,19 @@
                     bar.style.background = "#ffc107"; 
                     bar.innerHTML = "Parcels Updated (Money Failed)";
                     showToast("⚠️ Parcels updated, but Money was unreadable.");
+                    
+                    // Show Debug Box so we can see why money failed
+                    debugBox.style.display = "block";
+                    debugBox.innerHTML = "<strong>OCR Debug Data (Screenshot this!):</strong><br>" + text.replace(/\n/g, '<br>');
                 }
             } else {
                 bar.style.width = "100%";
                 bar.innerHTML = "Scan Failed. Text unclear.";
                 bar.style.background = "#ff4444";
                 showToast("❌ Could not read numbers. Try a cleaner image.");
+                
+                debugBox.style.display = "block";
+                debugBox.innerHTML = "<strong>OCR Debug Data (Screenshot this!):</strong><br>" + text.replace(/\n/g, '<br>');
             }
         }
 
@@ -530,7 +551,7 @@
             chart.data.labels = earningsHistory.map(x => x.date);
             chart.data.datasets[0].data = earningsHistory.map(x => x.income);
             chart.update();
-        }, 60000); // Chart updates once a minute
+        }, 60000);
 
         // Initialize App
         load();
