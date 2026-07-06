@@ -47,6 +47,17 @@
         .card h3 { opacity: .9; }
         table { width: 100%; border-collapse: collapse; }
         td { padding: 12px; border-bottom: 1px solid rgba(255, 255, 255, .12); }
+        
+        /* Interactive Edit Styles */
+        .editable { cursor: pointer; position: relative; display: inline-block; transition: 0.2s; }
+        .editable:hover { color: #ffffff; text-shadow: 0 0 10px #00ff88; }
+        .editable::after {
+            content: "✏️ Tap to edit"; position: absolute; top: -25px; left: 50%; transform: translateX(-50%);
+            font-size: 0.75rem; background: #000000dd; padding: 4px 10px; border-radius: 5px; color: #00ff88;
+            opacity: 0; pointer-events: none; transition: 0.2s; white-space: nowrap;
+        }
+        .editable:hover::after { opacity: 1; top: -30px; }
+
         input[type=file] {
             width: 100%; padding: 15px; border-radius: 12px; border: none;
             background: #ffffff15; color: #fff; cursor: pointer;
@@ -115,7 +126,7 @@
     <header>
         <div class="logo">
             <h1>🌍 Atlas Earth Dashboard</h1>
-            <p>GitHub Companion</p>
+            <p>Hybrid Sync Edition</p>
         </div>
     </header>
 
@@ -146,17 +157,17 @@
         <div class="cards">
             <div class="card">
                 <h3>Current Income</h3>
-                <h1 id="income">$6.15229263</h1>
+                <h1 id="income" class="editable" onclick="manualEdit('currentIncome')">$6.15229263</h1>
             </div>
             <div class="card">
                 <h3>Total Rent Earned</h3>
-                <h1 id="rent">$15.15226684</h1>
+                <h1 id="rent" class="editable" onclick="manualEdit('totalRent')">$15.15226684</h1>
             </div>
         </div>
 
         <div class="card">
             <h2>📸 Upload Screenshot</h2>
-            <p style="margin-bottom: 10px; font-size: 0.9rem; opacity: 0.8;">Upload your Player Info screenshot to instantly update your layout stats.</p>
+            <p style="margin-bottom: 10px; font-size: 0.9rem; opacity: 0.8;">Upload to update Parcels & Badges. Tap your money above to edit manually if the scan fails!</p>
             <input type="file" id="upload" accept="image/*">
             <div id="dropArea">
                 <h2>📸 Drop Screenshot Here</h2>
@@ -271,6 +282,27 @@
             return "$" + value.toFixed(8);
         }
 
+        // --- NEW: Manual Edit Function ---
+        function manualEdit(type) {
+            let currentVal = type === 'currentIncome' ? stats.currentIncome : stats.totalRent;
+            let promptText = type === 'currentIncome' ? "Update Current Income ($):" : "Update Total Rent Earned ($):";
+            
+            let newVal = prompt(promptText, currentVal.toFixed(8));
+            
+            if (newVal !== null) {
+                let parsedVal = parseFloat(newVal.replace(/[^\d.-]/g, ''));
+                if (!isNaN(parsedVal)) {
+                    stats[type] = parsedVal;
+                    updateNumbers();
+                    updateIncome();
+                    save();
+                    showToast("✅ Manual update saved!");
+                } else {
+                    showToast("❌ Invalid number entered.");
+                }
+            }
+        }
+
         function updateIncome() {
             let second = rentPerSecond();
             document.getElementById("hour").innerHTML = money(second * 3600);
@@ -370,7 +402,7 @@
         }
 
         // =======================================
-        // OCR Engine (Auto-Correcting Hunter)
+        // OCR Engine
         // =======================================
         const uploadInput = document.getElementById("upload");
         const dropArea = document.getElementById("dropArea");
@@ -410,7 +442,6 @@
                 });
                 parseAtlas(result.data.text);
             } catch (err) {
-                console.error("OCR Error", err);
                 bar.style.width = "100%";
                 bar.innerHTML = "Error: Image format or size.";
                 bar.style.background = "#ff4444";
@@ -421,14 +452,7 @@
             let moneyUpdated = false;
             let parcelsUpdated = false;
 
-            // --- 1. Hunt for Money (With Auto-Corrections) ---
-            // Tesseract frequently confuses letters and numbers in long 18-digit strings.
-            let mText = text.replace(/\s+/g, ''); // Strip all spaces
-            mText = mText.replace(/(\d),(\d)/g, '$1.$2'); // Fix commas read as decimals
-            mText = mText.replace(/[Oo]/g, '0'); // Fix capital O's read as 0's
-            mText = mText.replace(/[lIi]/g, '1'); // Fix L/I read as 1's
-            mText = mText.replace(/[sS$]/g, ''); // Strip dollar signs
-            
+            let mText = text.replace(/\s+/g, '').replace(/(\d),(\d)/g, '$1.$2').replace(/[Oo]/g, '0').replace(/[lIi]/g, '1').replace(/[sS$]/g, '');
             const moneyMatches = [...mText.matchAll(/(\d+\.\d{5,})/g)].map(m => parseFloat(m[1]));
             
             if (moneyMatches.length >= 2) {
@@ -444,7 +468,6 @@
                 moneyUpdated = true;
             }
 
-            // --- 2. Hunt for Parcels ---
             const find = (kw) => {
                 const regex = new RegExp(kw + "\\s*\\D*(\\d+)|(\\d+)\\s*" + kw, "i");
                 const match = text.match(regex);
@@ -455,12 +478,9 @@
             const r = find("RARE"); if (r !== null) { stats.rare = r; parcelsUpdated = true; }
             const e = find("EPIC"); if (e !== null) { stats.epic = e; parcelsUpdated = true; }
             const l = find("LEGENDARY"); if (l !== null) { stats.legendary = l; parcelsUpdated = true; }
-
-            // --- 3. Hunt for Boost ---
             const bMatch = text.match(/(\d+)%\s*BOOST|BADGES:?\s*(\d+)%/i);
             if (bMatch) { stats.boost = parseInt(bMatch[1] || bMatch[2]); parcelsUpdated = true; }
 
-            // --- UI Updates & Feedback ---
             const bar = document.getElementById("progressBar");
             
             if (moneyUpdated || parcelsUpdated) {
@@ -468,34 +488,19 @@
                 updateIncome();
                 updateBars();
                 save();
-                
                 bar.style.width = "100%";
                 
                 if (moneyUpdated && parcelsUpdated) {
                     bar.style.background = "linear-gradient(90deg, #00ff88, #00c853)";
                     bar.innerHTML = "Scan Complete!";
                     showToast("✅ Stats & Money updated!");
-                } else if (moneyUpdated) {
-                    bar.style.background = "linear-gradient(90deg, #00ff88, #00c853)";
-                    bar.innerHTML = "Money Updated!";
-                    showToast("✅ Money updated! (Parcels not found)");
                 } else if (parcelsUpdated) {
                     bar.style.background = "#ffc107"; 
                     bar.innerHTML = "Parcels Updated (Money Failed)";
-                    showToast("⚠️ Parcels updated, but Money was unreadable.");
-                    
-                    // Show Debug Box so we can see why money failed
+                    showToast("⚠️ Parcels updated. Tap your money numbers above to edit manually!");
                     debugBox.style.display = "block";
                     debugBox.innerHTML = "<strong>OCR Debug Data (Screenshot this!):</strong><br>" + text.replace(/\n/g, '<br>');
                 }
-            } else {
-                bar.style.width = "100%";
-                bar.innerHTML = "Scan Failed. Text unclear.";
-                bar.style.background = "#ff4444";
-                showToast("❌ Could not read numbers. Try a cleaner image.");
-                
-                debugBox.style.display = "block";
-                debugBox.innerHTML = "<strong>OCR Debug Data (Screenshot this!):</strong><br>" + text.replace(/\n/g, '<br>');
             }
         }
 
@@ -507,16 +512,9 @@
             setTimeout(() => toast.remove(), 3500);
         }
 
-        // =======================================
-        // Chart.js Setup
-        // =======================================
         let earningsHistory = JSON.parse(localStorage.getItem("earningsHistory")) || [];
-
         function saveHistory() {
-            earningsHistory.push({
-                date: new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}),
-                income: stats.currentIncome
-            });
+            earningsHistory.push({ date: new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}), income: stats.currentIncome });
             if(earningsHistory.length > 20) earningsHistory.shift();
             localStorage.setItem("earningsHistory", JSON.stringify(earningsHistory));
         }
@@ -529,20 +527,14 @@
                 datasets: [{
                     label: "Live Income",
                     data: earningsHistory.map(x => x.income),
-                    tension: .35,
-                    fill: true,
-                    borderColor: '#00ff88',
-                    backgroundColor: 'rgba(0, 255, 136, 0.1)',
-                    borderWidth: 3
+                    tension: .35, fill: true, borderColor: '#00ff88',
+                    backgroundColor: 'rgba(0, 255, 136, 0.1)', borderWidth: 3
                 }]
             },
             options: {
                 responsive: true,
                 plugins: { legend: { labels: { color: "white" } } },
-                scales: {
-                    x: { ticks: { color: "white", maxTicksLimit: 6 } },
-                    y: { ticks: { color: "white" } }
-                }
+                scales: { x: { ticks: { color: "white", maxTicksLimit: 6 } }, y: { ticks: { color: "white" } } }
             }
         });
 
@@ -553,7 +545,6 @@
             chart.update();
         }, 60000);
 
-        // Initialize App
         load();
         updateNumbers();
         updateIncome();
