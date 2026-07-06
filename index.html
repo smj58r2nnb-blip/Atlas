@@ -10,9 +10,6 @@
     <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
     
     <style>
-        /* ==========================================
-           Atlas Earth Dashboard Styles
-        ========================================== */
         * {
             margin: 0;
             padding: 0;
@@ -233,9 +230,6 @@
             <h1>🌍 Atlas Earth Dashboard</h1>
             <p>GitHub Companion</p>
         </div>
-        <div class="header-right">
-            <div id="clock"></div>
-        </div>
     </header>
 
     <div class="container">
@@ -276,7 +270,7 @@
         <div class="card">
             <h2>📸 Upload Screenshot</h2>
             <input type="file" id="upload" accept="image/*">
-            <p style="margin-top: 10px;">Upload an Atlas Earth screenshot to automatically update your dashboard.</p>
+            <p style="margin-top: 10px;">Upload your Player Info screenshot to instantly update all stats.</p>
         </div>
 
         <div class="cards">
@@ -494,14 +488,27 @@
         }
 
         function parseAtlas(text) {
-            const moneyMatch = text.match(/\$(\d+\.\d+)/);
+            // Find ALL dollar amounts in the scanned text
+            const moneyMatches = [...text.matchAll(/\$\s*(\d+\.\d+)/g)];
+            
+            if (moneyMatches.length >= 2) {
+                let val1 = parseFloat(moneyMatches[0][1]);
+                let val2 = parseFloat(moneyMatches[1][1]);
+                
+                // Total Rent is always the larger number, Current Income is the smaller
+                stats.totalRent = Math.max(val1, val2);
+                stats.currentIncome = Math.min(val1, val2);
+            } else if (moneyMatches.length === 1) {
+                // Fallback if the scanner only caught one number
+                stats.currentIncome = parseFloat(moneyMatches[0][1]);
+            }
+
             const commonMatch = text.match(/(\d+)[\s\n]*COMMON/);
             const rareMatch = text.match(/(\d+)[\s\n]*RARE/);
             const epicMatch = text.match(/(\d+)[\s\n]*EPIC/);
             const legMatch = text.match(/(\d+)[\s\n]*LEGENDARY/);
             const boostMatch = text.match(/BADGES:\s*(\d+)%/);
 
-            if(moneyMatch) stats.currentIncome = parseFloat(moneyMatch[1]);
             if(commonMatch) stats.common = parseInt(commonMatch[1]);
             if(rareMatch) stats.rare = parseInt(rareMatch[1]);
             if(epicMatch) stats.epic = parseInt(epicMatch[1]);
@@ -567,7 +574,7 @@
             chart.data.labels = earningsHistory.map(x => x.date);
             chart.data.datasets[0].data = earningsHistory.map(x => x.income);
             chart.update();
-        }, 10000); // Updates chart every 10 seconds for a more "live" feel
+        }, 10000);
 
         // Initialize App
         load();
