@@ -7,7 +7,6 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
     
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -33,9 +32,7 @@
             width: 120px; height: 120px; border-radius: 50%;
             border: 4px solid #00ff88; object-fit: cover;
         }
-        .cards {
-            display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 25px;
-        }
+        .cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 25px; }
         .card {
             background: rgba(255, 255, 255, .08); backdrop-filter: blur(18px);
             border-radius: 20px; padding: 25px; box-shadow: 0 12px 35px rgba(0, 0, 0, .35);
@@ -45,16 +42,24 @@
         .card h1 { color: #00ff88; margin-top: 10px; font-size: 2rem; }
         .card h2 { margin-bottom: 20px; }
         .card h3 { opacity: .9; }
+        
         table { width: 100%; border-collapse: collapse; }
         td { padding: 12px; border-bottom: 1px solid rgba(255, 255, 255, .12); }
-        input[type=file] {
-            width: 100%; padding: 15px; border-radius: 12px; border: none;
-            background: #ffffff15; color: #fff; cursor: pointer;
+        
+        input.api-input {
+            width: 100%; padding: 12px; border-radius: 8px; border: none;
+            background: rgba(0,0,0,0.3); color: #fff; margin-bottom: 12px;
+            font-family: monospace; font-size: 0.9rem;
         }
-        input[type=file]::file-selector-button {
-            background: #00cc66; color: white; border: none;
-            padding: 10px 16px; border-radius: 8px; cursor: pointer; margin-right: 15px;
+        input.api-input::placeholder { color: rgba(255,255,255,0.4); }
+        
+        button {
+            width: 100%; background: #00cc66; color: white; border: none;
+            padding: 14px 24px; border-radius: 10px; cursor: pointer;
+            font-weight: bold; text-transform: uppercase; transition: .3s;
         }
+        button:hover { background: #00b35a; }
+
         .bar {
             width: 100%; height: 22px; background: #233646;
             border-radius: 20px; overflow: hidden; margin: 10px 0 18px;
@@ -65,26 +70,6 @@
         .epic { background: #9b59b6; width: 14%; }
         .legendary { background: #f1c40f; width: 4%; }
         
-        #dropArea {
-            margin-top: 25px; border: 3px dashed #00ff88; border-radius: 20px;
-            padding: 35px; text-align: center; transition: .3s; background: rgba(255, 255, 255, .04);
-        }
-        #dropArea.drag { background: rgba(0, 255, 136, .18); border-color: #00ffaa; transform: scale(1.02); }
-        #dropArea h2 { margin-bottom: 10px; }
-        #dropArea p { opacity: .8; }
-        #preview {
-            display: block; max-width: 100%; margin: 25px auto 0;
-            border-radius: 15px; box-shadow: 0 15px 35px rgba(0, 0, 0, .5);
-        }
-        #progressContainer {
-            width: 100%; height: 24px; margin-top: 20px;
-            border-radius: 20px; overflow: hidden; background: #2a3947;
-        }
-        #progressBar {
-            width: 0%; height: 100%; background: linear-gradient(90deg, #00ff88, #00c853);
-            color: white; font-weight: bold; display: flex;
-            justify-content: center; align-items: center; transition: width .2s;
-        }
         .toast {
             position: fixed; bottom: 30px; right: 30px; background: #00cc66;
             color: white; padding: 18px 24px; border-radius: 12px;
@@ -107,7 +92,7 @@
     <header>
         <div class="logo">
             <h1>🌍 Atlas Earth Dashboard</h1>
-            <p>GitHub Companion</p>
+            <p>Live Sync Mode</p>
         </div>
     </header>
 
@@ -147,9 +132,14 @@
         </div>
 
         <div class="card">
-            <h2>📸 Upload Screenshot</h2>
-            <input type="file" id="upload" accept="image/*">
-            <p style="margin-top: 10px;">Upload your Player Info screenshot to instantly update all stats.</p>
+            <h2>🔗 Live Server Sync</h2>
+            <p style="margin-bottom: 15px; font-size: 0.9rem; opacity: 0.8;">Connect your proxy to pull live game data. Tokens are saved securely on your device, not on GitHub.</p>
+            
+            <input type="text" id="apiEndpoint" class="api-input" placeholder="Google Apps Script Web App URL">
+            <input type="password" id="apiToken" class="api-input" placeholder="Bearer eyJhbGciOi...">
+            
+            <button onclick="fetchLiveData()">Sync Live Data</button>
+            <div id="apiStatus" style="margin-top: 15px; font-size: 0.9rem; font-weight: bold; text-align: center;"></div>
         </div>
 
         <div class="cards">
@@ -161,25 +151,21 @@
                     <tr><td>Rare</td><td id="rare">33</td></tr>
                     <tr><td>Epic</td><td id="epic">15</td></tr>
                     <tr><td>Legendary</td><td id="legendary">4</td></tr>
-                    <tr><td>Badge Boost</td><td id="boostDisplay">10%</td></tr>
+                    <tr>
+                        <td>Badge Boost (%)</td>
+                        <td>
+                            <input type="number" id="manualBoost" value="10" onchange="updateManualBoost()" 
+                                style="width: 60px; padding: 6px; background: rgba(0,0,0,0.3); color: #00ff88; border: 1px solid rgba(0,255,136,0.3); border-radius: 6px; text-align: center; font-weight: bold;">
+                        </td>
+                    </tr>
                 </table>
             </div>
 
             <div class="card">
-                <h2>Estimated Income</h2>
+                <h2>⚖️ Strategy ROI</h2>
                 <table>
-                    <tr><td>Per Hour</td><td id="hour">$0.00</td></tr>
-                    <tr><td>Per Day</td><td id="day">$0.00</td></tr>
-                    <tr><td>Per Month</td><td id="month">$0.00</td></tr>
-                    <tr><td>Per Year</td><td id="year">$0.00</td></tr>
-                </table>
-            </div>
-            
-            <div class="card">
-                <h2>⚖️ Optimization Strategy</h2>
-                <table>
-                    <tr><td>1 Avg Parcel Value</td><td id="valParcel">$0.00 /yr</td></tr>
-                    <tr><td>+5% Badge Tier Value</td><td id="valBadge">$0.00 /yr</td></tr>
+                    <tr><td>1 Avg Parcel</td><td id="valParcel">$0.00 /yr</td></tr>
+                    <tr><td>+5% Tier Jump</td><td id="valBadge">$0.00 /yr</td></tr>
                 </table>
                 <p id="roiRecommendation" style="margin-top:20px; font-size:0.95rem; color:#00ff88; text-align:center; font-weight:600; line-height:1.5;">
                     Analyzing layout...
@@ -194,28 +180,16 @@
             </div>
 
             <div class="card">
-                <h2>🏆 Milestones</h2>
-                <table>
-                    <tr><td>$10</td><td id="goal10"></td></tr>
-                    <tr><td>$25</td><td id="goal25"></td></tr>
-                    <tr><td>$50</td><td id="goal50"></td></tr>
-                    <tr><td>$100</td><td id="goal100"></td></tr>
-                    <tr><td>$500</td><td id="goal500"></td></tr>
-                    <tr><td>$1000</td><td id="goal1000"></td></tr>
-                </table>
+                <h2>Parcel Breakdown</h2>
+                <p>Common</p>
+                <div class="bar"><div class="common" id="commonBar"></div></div>
+                <p>Rare</p>
+                <div class="bar"><div class="rare" id="rareBar"></div></div>
+                <p>Epic</p>
+                <div class="bar"><div class="epic" id="epicBar"></div></div>
+                <p>Legendary</p>
+                <div class="bar"><div class="legendary" id="legendaryBar"></div></div>
             </div>
-        </div>
-
-        <div class="card">
-            <h2>Parcel Breakdown</h2>
-            <p>Common</p>
-            <div class="bar"><div class="common" id="commonBar"></div></div>
-            <p>Rare</p>
-            <div class="bar"><div class="rare" id="rareBar"></div></div>
-            <p>Epic</p>
-            <div class="bar"><div class="epic" id="epicBar"></div></div>
-            <p>Legendary</p>
-            <div class="bar"><div class="legendary" id="legendaryBar"></div></div>
         </div>
     </div>
 
@@ -240,6 +214,21 @@
             legendary: 0.0000000044
         };
 
+        // On Load: Populate the API inputs and Badge Boost if previously saved
+        window.onload = () => {
+            document.getElementById('apiEndpoint').value = localStorage.getItem('ae_api_url') || "";
+            document.getElementById('apiToken').value = localStorage.getItem('ae_api_token') || "";
+            
+            load();
+            document.getElementById('manualBoost').value = stats.boost;
+            
+            updateNumbers();
+            updateIncome();
+            updateBars();
+            updateDashboard();
+            setInterval(liveCounter, 1000);
+        };
+
         function totalParcels() {
             return stats.common + stats.rare + stats.epic + stats.legendary;
         }
@@ -252,16 +241,16 @@
             return base * (1 + (stats.boost / 100));
         }
 
-        function money(value) {
-            return "$" + value.toFixed(8);
+        function money(value) { return "$" + value.toFixed(8); }
+
+        function updateManualBoost() {
+            stats.boost = parseInt(document.getElementById('manualBoost').value) || 0;
+            save();
+            updateNumbers();
         }
 
         function updateIncome() {
             let second = rentPerSecond();
-            document.getElementById("hour").innerHTML = money(second * 3600);
-            document.getElementById("day").innerHTML = money(second * 86400);
-            document.getElementById("month").innerHTML = money(second * 86400 * 30);
-            document.getElementById("year").innerHTML = money(second * 86400 * 365);
         }
 
         function updateBars() {
@@ -274,20 +263,9 @@
         }
 
         function updateStrategy() {
-            // Statistical average base rent of a single parcel
             const avgParcelBase = 0.00000000158; 
-            
-            // Current total base rent (unboosted)
-            let currentBaseRent = 
-                (stats.common * rates.common) + 
-                (stats.rare * rates.rare) + 
-                (stats.epic * rates.epic) + 
-                (stats.legendary * rates.legendary);
-
-            // Actual yearly gain from 1 average parcel with current boost
+            let currentBaseRent = (stats.common * rates.common) + (stats.rare * rates.rare) + (stats.epic * rates.epic) + (stats.legendary * rates.legendary);
             let parcelGainYear = (avgParcelBase * (1 + (stats.boost / 100))) * 86400 * 365;
-
-            // Actual yearly gain from a 5% tier jump based on current base rent
             let badgeGainYear = (currentBaseRent * 0.05) * 86400 * 365;
 
             document.getElementById("valParcel").innerHTML = "+ " + money(parcelGainYear) + " /yr";
@@ -298,16 +276,13 @@
             let parcelsNeeded = badgeGainYear / parcelGainYear;
 
             let recHTML = `A 5% badge jump gives the same rent as buying <b>${parcelsNeeded.toFixed(1)} average parcels.</b><br><br>`;
-
             if (total >= 150 && total < 220) {
                 recHTML += "<span style='color:#ffc107'>⚠️ You are at the 150 parcel tier drop! Save AB to jump straight to 220.</span>";
             } else if (parcelsNeeded > 20) {
-                // If a badge jump gives more value than 20 parcels (approx AB cost to jump tiers)
-                recHTML += "<span style='color:#00ff88'>⭐ Buy Badges! A tier jump is mathematically better than buying land right now.</span>";
+                recHTML += "<span style='color:#00ff88'>⭐ Buy Badges! A tier jump gives a higher ROI right now.</span>";
             } else {
-                recHTML += "<span style='color:#2196F3'>📍 Buy Land! Parcels provide higher ROI for your Atlas Bucks right now.</span>";
+                recHTML += "<span style='color:#2196F3'>📍 Buy Land! Parcels provide higher ROI right now.</span>";
             }
-            
             elRec.innerHTML = recHTML;
         }
 
@@ -319,14 +294,10 @@
             document.getElementById("rare").innerHTML = stats.rare;
             document.getElementById("epic").innerHTML = stats.epic;
             document.getElementById("legendary").innerHTML = stats.legendary;
-            document.getElementById("boostDisplay").innerHTML = stats.boost + "%";
-            
             updateStrategy();
         }
 
-        function save() {
-            localStorage.setItem("atlasDashboard", JSON.stringify(stats));
-        }
+        function save() { localStorage.setItem("atlasDashboard", JSON.stringify(stats)); }
 
         function load() {
             let saved = localStorage.getItem("atlasDashboard");
@@ -346,14 +317,6 @@
             document.getElementById("rentSecond").innerHTML = money(second);
             document.getElementById("dailyEarnings").innerHTML = money(second * 86400);
             
-            const goals = [10, 25, 50, 100, 500, 1000];
-            goals.forEach(goal => {
-                const el = document.getElementById("goal" + goal);
-                if(!el) return;
-                const remaining = goal - stats.currentIncome;
-                el.innerHTML = remaining <= 0 ? "✅ Reached" : formatTime(remaining / second);
-            });
-
             const next = document.getElementById("nextTen");
             if(next) {
                 const remain = 10 - stats.currentIncome;
@@ -370,87 +333,59 @@
         }
 
         // =======================================
-        // OCR Engine
+        // LIVE API FETCH LOGIC
         // =======================================
-        const uploadInput = document.getElementById("upload");
-        const dropArea = document.createElement("div");
-        dropArea.id = "dropArea";
-        dropArea.innerHTML = `
-            <h2>📸 Drop Atlas Earth Screenshot Here</h2>
-            <p>or click above to browse</p>
-            <div id="progressContainer"><div id="progressBar"></div></div>
-            <img id="preview" style="display:none;">
-        `;
-        uploadInput.parentNode.appendChild(dropArea);
+        async function fetchLiveData() {
+            const endpoint = document.getElementById("apiEndpoint").value.trim();
+            const token = document.getElementById("apiToken").value.trim();
+            const statusEl = document.getElementById("apiStatus");
 
-        function updateProgress(percent) {
-            const bar = document.getElementById("progressBar");
-            if(bar) {
-                bar.style.width = percent + "%";
-                bar.innerHTML = Math.floor(percent) + "%";
+            if(!endpoint || !token) {
+                statusEl.innerText = "⚠️ Please enter both URL and Token.";
+                statusEl.style.color = "#ffc107";
+                return;
             }
-        }
 
-        dropArea.addEventListener("dragover", (e) => { e.preventDefault(); dropArea.classList.add("drag"); });
-        dropArea.addEventListener("dragleave", () => dropArea.classList.remove("drag"));
-        dropArea.addEventListener("drop", (e) => {
-            e.preventDefault();
-            dropArea.classList.remove("drag");
-            processImage(e.dataTransfer.files[0]);
-        });
-        uploadInput.addEventListener("change", (e) => processImage(e.target.files[0]));
+            statusEl.innerText = "🔄 Pulling data from Atlas Earth...";
+            statusEl.style.color = "#2196F3";
 
-        async function processImage(file) {
-            if(!file) return;
-            const preview = document.getElementById("preview");
-            preview.src = URL.createObjectURL(file);
-            preview.style.display = "block";
-            updateProgress(0);
+            // Save credentials to local browser storage
+            localStorage.setItem("ae_api_url", endpoint);
+            localStorage.setItem("ae_api_token", token);
 
             try {
-                const result = await Tesseract.recognize(file, "eng", {
-                    logger: m => { if(m.status === "recognizing text") updateProgress(m.progress * 100); }
-                });
-                parseAtlas(result.data.text.toUpperCase());
+                const response = await fetch(`${endpoint}?token=${encodeURIComponent(token)}`);
+                const data = await response.json();
+
+                if(data.error) throw new Error(data.error);
+
+                // Map live payload to our stats object
+                stats.totalRent = data.rent.totalAccrued;
+                stats.currentIncome = data.balance.balances.cash;
+                stats.common = data.rent.parcels.Common || 0;
+                stats.rare = data.rent.parcels.Rare || 0;
+                stats.epic = data.rent.parcels.Epic || 0;
+                stats.legendary = data.rent.parcels.Legendary || 0;
+
+                updateNumbers();
+                updateBars();
+                save();
+
+                statusEl.innerText = "✅ Live Data Synced Successfully!";
+                statusEl.style.color = "#00ff88";
+                showToast("Live stats pulled from Atlas Earth!");
+
             } catch (err) {
-                console.error("OCR Error", err);
+                console.error(err);
+                statusEl.innerText = "❌ Sync failed. Your Session Token may have expired.";
+                statusEl.style.color = "#ff4444";
             }
         }
 
-        function parseAtlas(text) {
-            const moneyMatches = [...text.matchAll(/\$\s*(\d+\.\d+)/g)];
-            if (moneyMatches.length >= 2) {
-                let val1 = parseFloat(moneyMatches[0][1]);
-                let val2 = parseFloat(moneyMatches[1][1]);
-                stats.totalRent = Math.max(val1, val2);
-                stats.currentIncome = Math.min(val1, val2);
-            } else if (moneyMatches.length === 1) {
-                stats.currentIncome = parseFloat(moneyMatches[0][1]);
-            }
-
-            const commonMatch = text.match(/(\d+)[\s\n]*COMMON/);
-            const rareMatch = text.match(/(\d+)[\s\n]*RARE/);
-            const epicMatch = text.match(/(\d+)[\s\n]*EPIC/);
-            const legMatch = text.match(/(\d+)[\s\n]*LEGENDARY/);
-            const boostMatch = text.match(/BADGES:\s*(\d+)%/);
-
-            if(commonMatch) stats.common = parseInt(commonMatch[1]);
-            if(rareMatch) stats.rare = parseInt(rareMatch[1]);
-            if(epicMatch) stats.epic = parseInt(epicMatch[1]);
-            if(legMatch) stats.legendary = parseInt(legMatch[1]);
-            if(boostMatch) stats.boost = parseInt(boostMatch[1]);
-
-            updateNumbers();
-            updateIncome();
-            updateBars();
-            save();
-            showToast();
-        }
-
-        function showToast() {
+        function showToast(msg) {
             let toast = document.createElement("div");
             toast.className = "toast";
-            toast.innerHTML = "✅ Atlas Earth stats updated";
+            toast.innerHTML = `✅ ${msg}`;
             document.body.appendChild(toast);
             setTimeout(() => toast.remove(), 3000);
         }
@@ -477,20 +412,14 @@
                 datasets: [{
                     label: "Live Income",
                     data: earningsHistory.map(x => x.income),
-                    tension: .35,
-                    fill: true,
-                    borderColor: '#00ff88',
-                    backgroundColor: 'rgba(0, 255, 136, 0.1)',
-                    borderWidth: 3
+                    tension: .35, fill: true, borderColor: '#00ff88',
+                    backgroundColor: 'rgba(0, 255, 136, 0.1)', borderWidth: 3
                 }]
             },
             options: {
                 responsive: true,
                 plugins: { legend: { labels: { color: "white" } } },
-                scales: {
-                    x: { ticks: { color: "white" } },
-                    y: { ticks: { color: "white" } }
-                }
+                scales: { x: { ticks: { color: "white" } }, y: { ticks: { color: "white" } } }
             }
         });
 
@@ -500,14 +429,6 @@
             chart.data.datasets[0].data = earningsHistory.map(x => x.income);
             chart.update();
         }, 10000);
-
-        // Initialize App
-        load();
-        updateNumbers();
-        updateIncome();
-        updateBars();
-        updateDashboard();
-        setInterval(liveCounter, 1000);
     </script>
 </body>
 </html>
