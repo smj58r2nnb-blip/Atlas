@@ -10,211 +10,90 @@
     <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
     
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
+        * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
             font-family: 'Poppins', sans-serif;
             background: linear-gradient(135deg, #071b2d, #0f3d5d, #1f7a3d);
             color: #fff;
             min-height: 100vh;
         }
-
-        header {
-            text-align: center;
-            padding: 40px 20px;
-        }
-
-        header h1 {
-            font-size: 3rem;
-            margin-bottom: 10px;
-        }
-
-        header p {
-            opacity: .8;
-        }
-
+        header { text-align: center; padding: 40px 20px; }
+        header h1 { font-size: 3rem; margin-bottom: 10px; }
+        header p { opacity: .8; }
         .container {
-            width: 95%;
-            max-width: 1300px;
-            margin: auto;
-            display: grid;
-            gap: 25px;
-            padding-bottom: 50px;
+            width: 95%; max-width: 1300px; margin: auto;
+            display: grid; gap: 25px; padding-bottom: 50px;
         }
-
         .profile {
-            display: flex;
-            align-items: center;
-            gap: 25px;
-            background: rgba(255, 255, 255, .08);
-            backdrop-filter: blur(18px);
-            border-radius: 20px;
-            padding: 25px;
-            box-shadow: 0 15px 40px rgba(0, 0, 0, .4);
+            display: flex; align-items: center; gap: 25px;
+            background: rgba(255, 255, 255, .08); backdrop-filter: blur(18px);
+            border-radius: 20px; padding: 25px; box-shadow: 0 15px 40px rgba(0, 0, 0, .4);
         }
-
         .profile img {
-            width: 120px;
-            height: 120px;
-            border-radius: 50%;
-            border: 4px solid #00ff88;
-            object-fit: cover;
+            width: 120px; height: 120px; border-radius: 50%;
+            border: 4px solid #00ff88; object-fit: cover;
         }
-
         .cards {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-            gap: 25px;
+            display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 25px;
         }
-
         .card {
-            background: rgba(255, 255, 255, .08);
-            backdrop-filter: blur(18px);
-            border-radius: 20px;
-            padding: 25px;
-            box-shadow: 0 12px 35px rgba(0, 0, 0, .35);
-            transition: .3s;
-            animation: fadeIn .8s ease;
+            background: rgba(255, 255, 255, .08); backdrop-filter: blur(18px);
+            border-radius: 20px; padding: 25px; box-shadow: 0 12px 35px rgba(0, 0, 0, .35);
+            transition: .3s; animation: fadeIn .8s ease;
         }
-
-        .card:hover {
-            transform: translateY(-6px);
-            box-shadow: 0 20px 45px rgba(0, 0, 0, .5);
-        }
-
-        .card h1 {
-            color: #00ff88;
-            margin-top: 10px;
-            font-size: 2rem;
-        }
-
-        .card h2 {
-            margin-bottom: 20px;
-        }
-
-        .card h3 {
-            opacity: .9;
-        }
-
-        table {
-            width: 100%;
-            border-collapse: collapse;
-        }
-
-        td {
-            padding: 12px;
-            border-bottom: 1px solid rgba(255, 255, 255, .12);
-        }
-
+        .card:hover { transform: translateY(-6px); box-shadow: 0 20px 45px rgba(0, 0, 0, .5); }
+        .card h1 { color: #00ff88; margin-top: 10px; font-size: 2rem; }
+        .card h2 { margin-bottom: 20px; }
+        .card h3 { opacity: .9; }
+        table { width: 100%; border-collapse: collapse; }
+        td { padding: 12px; border-bottom: 1px solid rgba(255, 255, 255, .12); }
         input[type=file] {
-            width: 100%;
-            padding: 15px;
-            border-radius: 12px;
-            border: none;
-            background: #ffffff15;
-            color: #fff;
-            cursor: pointer;
+            width: 100%; padding: 15px; border-radius: 12px; border: none;
+            background: #ffffff15; color: #fff; cursor: pointer;
         }
-
         input[type=file]::file-selector-button {
-            background: #00cc66;
-            color: white;
-            border: none;
-            padding: 10px 16px;
-            border-radius: 8px;
-            cursor: pointer;
-            margin-right: 15px;
+            background: #00cc66; color: white; border: none;
+            padding: 10px 16px; border-radius: 8px; cursor: pointer; margin-right: 15px;
         }
-
         .bar {
-            width: 100%;
-            height: 22px;
-            background: #233646;
-            border-radius: 20px;
-            overflow: hidden;
-            margin: 10px 0 18px;
+            width: 100%; height: 22px; background: #233646;
+            border-radius: 20px; overflow: hidden; margin: 10px 0 18px;
         }
-
-        .common, .rare, .epic, .legendary {
-            height: 100%;
-            transition: width 1s ease;
-        }
-
+        .common, .rare, .epic, .legendary { height: 100%; transition: width 1s ease; }
         .common { background: #7f8c8d; width: 50%; }
         .rare { background: #3498db; width: 32%; }
         .epic { background: #9b59b6; width: 14%; }
         .legendary { background: #f1c40f; width: 4%; }
-
+        
         #dropArea {
-            margin-top: 25px;
-            border: 3px dashed #00ff88;
-            border-radius: 20px;
-            padding: 35px;
-            text-align: center;
-            transition: .3s;
-            background: rgba(255, 255, 255, .04);
+            margin-top: 25px; border: 3px dashed #00ff88; border-radius: 20px;
+            padding: 35px; text-align: center; transition: .3s; background: rgba(255, 255, 255, .04);
         }
-
-        #dropArea.drag {
-            background: rgba(0, 255, 136, .18);
-            border-color: #00ffaa;
-            transform: scale(1.02);
-        }
-
+        #dropArea.drag { background: rgba(0, 255, 136, .18); border-color: #00ffaa; transform: scale(1.02); }
         #dropArea h2 { margin-bottom: 10px; }
         #dropArea p { opacity: .8; }
-
         #preview {
-            display: block;
-            max-width: 100%;
-            margin: 25px auto 0;
-            border-radius: 15px;
-            box-shadow: 0 15px 35px rgba(0, 0, 0, .5);
+            display: block; max-width: 100%; margin: 25px auto 0;
+            border-radius: 15px; box-shadow: 0 15px 35px rgba(0, 0, 0, .5);
         }
-
         #progressContainer {
-            width: 100%;
-            height: 24px;
-            margin-top: 20px;
-            border-radius: 20px;
-            overflow: hidden;
-            background: #2a3947;
+            width: 100%; height: 24px; margin-top: 20px;
+            border-radius: 20px; overflow: hidden; background: #2a3947;
         }
-
         #progressBar {
-            width: 0%;
-            height: 100%;
-            background: linear-gradient(90deg, #00ff88, #00c853);
-            color: white;
-            font-weight: bold;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            transition: width .2s;
+            width: 0%; height: 100%; background: linear-gradient(90deg, #00ff88, #00c853);
+            color: white; font-weight: bold; display: flex;
+            justify-content: center; align-items: center; transition: width .2s;
         }
-
         .toast {
-            position: fixed;
-            bottom: 30px;
-            right: 30px;
-            background: #00cc66;
-            color: white;
-            padding: 18px 24px;
-            border-radius: 12px;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, .4);
-            animation: fadeIn .5s;
-            z-index: 9999;
+            position: fixed; bottom: 30px; right: 30px; background: #00cc66;
+            color: white; padding: 18px 24px; border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, .4); animation: fadeIn .5s; z-index: 9999;
         }
-
         @keyframes fadeIn {
             from { opacity: 0; transform: translateY(20px); }
             to { opacity: 1; transform: translateY(0); }
         }
-
         @media(max-width: 768px) {
             .profile { flex-direction: column; text-align: center; }
             header h1 { font-size: 2rem; }
@@ -294,6 +173,17 @@
                     <tr><td>Per Month</td><td id="month">$0.00</td></tr>
                     <tr><td>Per Year</td><td id="year">$0.00</td></tr>
                 </table>
+            </div>
+            
+            <div class="card">
+                <h2>⚖️ Optimization Strategy</h2>
+                <table>
+                    <tr><td>1 Avg Parcel Value</td><td id="valParcel">$0.00 /yr</td></tr>
+                    <tr><td>+5% Badge Tier Value</td><td id="valBadge">$0.00 /yr</td></tr>
+                </table>
+                <p id="roiRecommendation" style="margin-top:20px; font-size:0.95rem; color:#00ff88; text-align:center; font-weight:600; line-height:1.5;">
+                    Analyzing layout...
+                </p>
             </div>
         </div>
 
@@ -383,6 +273,44 @@
             document.getElementById("legendaryBar").style.width = (stats.legendary / total * 100) + "%";
         }
 
+        function updateStrategy() {
+            // Statistical average base rent of a single parcel
+            const avgParcelBase = 0.00000000158; 
+            
+            // Current total base rent (unboosted)
+            let currentBaseRent = 
+                (stats.common * rates.common) + 
+                (stats.rare * rates.rare) + 
+                (stats.epic * rates.epic) + 
+                (stats.legendary * rates.legendary);
+
+            // Actual yearly gain from 1 average parcel with current boost
+            let parcelGainYear = (avgParcelBase * (1 + (stats.boost / 100))) * 86400 * 365;
+
+            // Actual yearly gain from a 5% tier jump based on current base rent
+            let badgeGainYear = (currentBaseRent * 0.05) * 86400 * 365;
+
+            document.getElementById("valParcel").innerHTML = "+ " + money(parcelGainYear) + " /yr";
+            document.getElementById("valBadge").innerHTML = "+ " + money(badgeGainYear) + " /yr";
+
+            let elRec = document.getElementById("roiRecommendation");
+            let total = totalParcels();
+            let parcelsNeeded = badgeGainYear / parcelGainYear;
+
+            let recHTML = `A 5% badge jump gives the same rent as buying <b>${parcelsNeeded.toFixed(1)} average parcels.</b><br><br>`;
+
+            if (total >= 150 && total < 220) {
+                recHTML += "<span style='color:#ffc107'>⚠️ You are at the 150 parcel tier drop! Save AB to jump straight to 220.</span>";
+            } else if (parcelsNeeded > 20) {
+                // If a badge jump gives more value than 20 parcels (approx AB cost to jump tiers)
+                recHTML += "<span style='color:#00ff88'>⭐ Buy Badges! A tier jump is mathematically better than buying land right now.</span>";
+            } else {
+                recHTML += "<span style='color:#2196F3'>📍 Buy Land! Parcels provide higher ROI for your Atlas Bucks right now.</span>";
+            }
+            
+            elRec.innerHTML = recHTML;
+        }
+
         function updateNumbers() {
             document.getElementById("income").innerHTML = money(stats.currentIncome);
             document.getElementById("rent").innerHTML = money(stats.totalRent);
@@ -392,6 +320,8 @@
             document.getElementById("epic").innerHTML = stats.epic;
             document.getElementById("legendary").innerHTML = stats.legendary;
             document.getElementById("boostDisplay").innerHTML = stats.boost + "%";
+            
+            updateStrategy();
         }
 
         function save() {
@@ -488,18 +418,13 @@
         }
 
         function parseAtlas(text) {
-            // Find ALL dollar amounts in the scanned text
             const moneyMatches = [...text.matchAll(/\$\s*(\d+\.\d+)/g)];
-            
             if (moneyMatches.length >= 2) {
                 let val1 = parseFloat(moneyMatches[0][1]);
                 let val2 = parseFloat(moneyMatches[1][1]);
-                
-                // Total Rent is always the larger number, Current Income is the smaller
                 stats.totalRent = Math.max(val1, val2);
                 stats.currentIncome = Math.min(val1, val2);
             } else if (moneyMatches.length === 1) {
-                // Fallback if the scanner only caught one number
                 stats.currentIncome = parseFloat(moneyMatches[0][1]);
             }
 
