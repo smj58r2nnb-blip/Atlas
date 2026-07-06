@@ -4,12 +4,15 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Atlas Earth Calculator</title>
+    <!-- Include Tesseract.js for client-side OCR -->
+    <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
     <style>
         :root {
             --bg-color: #f4f4f9;
             --card-bg: #ffffff;
             --primary-color: #2c3e50;
             --accent-green: #4CAF50;
+            --accent-blue: #2196F3;
             --border-radius: 10px;
         }
 
@@ -37,6 +40,37 @@
             color: var(--accent-green);
         }
 
+        .upload-section {
+            background: #e3f2fd;
+            border: 2px dashed var(--accent-blue);
+            padding: 20px;
+            text-align: center;
+            border-radius: var(--border-radius);
+            margin-bottom: 20px;
+        }
+
+        .upload-section input[type="file"] {
+            display: none;
+        }
+
+        .upload-btn {
+            background-color: var(--accent-blue);
+            color: white;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+            display: inline-block;
+            text-transform: uppercase;
+        }
+
+        #status {
+            margin-top: 10px;
+            font-size: 0.9rem;
+            font-weight: bold;
+            color: #555;
+        }
+
         .input-grid {
             display: grid;
             grid-template-columns: 1fr 1fr;
@@ -56,7 +90,7 @@
             text-transform: uppercase;
         }
 
-        input {
+        input[type="number"] {
             padding: 10px;
             font-size: 1rem;
             border: 1px solid #ddd;
@@ -98,15 +132,14 @@
         .result-row {
             display: flex;
             justify-content: space-between;
-            padding: 8px 0;
+            padding: 10px 0;
             border-bottom: 1px solid #c8e6c9;
-            font-size: 0.95rem;
+            font-size: 1rem;
         }
 
         .result-row:last-child {
             border-bottom: none;
             font-weight: bold;
-            font-size: 1.1rem;
             color: var(--accent-green);
         }
     </style>
@@ -115,44 +148,48 @@
 
     <div class="container">
         <h1>Atlas Earth Earnings</h1>
+
+        <div class="upload-section">
+            <label class="upload-btn">
+                Upload Screenshot
+                <input type="file" id="imageInput" accept="image/*" onchange="processImage(event)">
+            </label>
+            <div id="status">Upload your player profile to auto-fill stats</div>
+        </div>
         
         <div class="input-grid">
             <div class="input-group">
                 <label style="color: #4CAF50;">Common</label>
-                <input type="number" id="common" value="52" min="0">
+                <input type="number" id="common" value="0" min="0">
             </div>
             <div class="input-group">
                 <label style="color: #2196F3;">Rare</label>
-                <input type="number" id="rare" value="33" min="0">
+                <input type="number" id="rare" value="0" min="0">
             </div>
             <div class="input-group">
                 <label style="color: #9C27B0;">Epic</label>
-                <input type="number" id="epic" value="15" min="0">
+                <input type="number" id="epic" value="0" min="0">
             </div>
             <div class="input-group">
                 <label style="color: #FFC107;">Legendary</label>
-                <input type="number" id="legendary" value="4" min="0">
+                <input type="number" id="legendary" value="0" min="0">
             </div>
             <div class="input-group full-width">
                 <label>Badge Boost (%)</label>
-                <input type="number" id="boost" value="10" min="0">
+                <input type="number" id="boost" value="0" min="0">
             </div>
         </div>
 
-        <button onclick="calculateEarnings()">Calculate Rent</button>
+        <button onclick="calculateEarnings()">Calculate Earnings</button>
 
         <div class="results" id="results" style="display: none;">
             <div class="result-row">
-                <span>Per Second:</span>
-                <span id="res-sec">$0.00</span>
-            </div>
-            <div class="result-row">
-                <span>Per Hour:</span>
-                <span id="res-hour">$0.00</span>
-            </div>
-            <div class="result-row">
                 <span>Per Day:</span>
                 <span id="res-day">$0.00</span>
+            </div>
+            <div class="result-row">
+                <span>Per Week:</span>
+                <span id="res-week">$0.00</span>
             </div>
             <div class="result-row">
                 <span>Per Month (30 Days):</span>
@@ -166,13 +203,54 @@
     </div>
 
     <script>
-        // Rent rates per second from game data
         const RATES = {
             common: 0.0000000011,
             rare: 0.0000000016,
             epic: 0.0000000022,
             legendary: 0.0000000044
         };
+
+        // Function to process the uploaded image using Tesseract.js
+        async function processImage(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const statusEl = document.getElementById('status');
+            statusEl.textContent = "Processing image... Please wait (this takes a few seconds).";
+            statusEl.style.color = "#FF9800";
+
+            try {
+                // Initialize Tesseract and recognize text
+                const result = await Tesseract.recognize(file, 'eng');
+                const text = result.data.text.toUpperCase();
+                
+                // Parse the text using Regular Expressions
+                // Looking for patterns like "52 COMMON" or "Badges:10% Boost"
+                const commonMatch = text.match(/(\d+)\s*COMMON/);
+                const rareMatch = text.match(/(\d+)\s*RARE/);
+                const epicMatch = text.match(/(\d+)\s*EPIC/);
+                const legMatch = text.match(/(\d+)\s*LEGENDARY/);
+                const boostMatch = text.match(/BADGES:\s*(\d+)%/); // Made uppercase for the regex
+
+                // Update inputs if matches are found
+                if (commonMatch) document.getElementById('common').value = commonMatch[1];
+                if (rareMatch) document.getElementById('rare').value = rareMatch[1];
+                if (epicMatch) document.getElementById('epic').value = epicMatch[1];
+                if (legMatch) document.getElementById('legendary').value = legMatch[1];
+                if (boostMatch) document.getElementById('boost').value = boostMatch[1];
+
+                statusEl.textContent = "Stats updated successfully!";
+                statusEl.style.color = "#4CAF50";
+
+                // Automatically calculate after successful parse
+                calculateEarnings();
+
+            } catch (error) {
+                console.error(error);
+                statusEl.textContent = "Error reading image. Please enter stats manually.";
+                statusEl.style.color = "#F44336";
+            }
+        }
 
         function calculateEarnings() {
             const common = parseInt(document.getElementById('common').value) || 0;
@@ -192,23 +270,19 @@
             let boostedPerSecond = basePerSecond * (1 + (boostPercent / 100));
 
             // Time multipliers
-            const perHour = boostedPerSecond * 3600;
-            const perDay = perHour * 24;
+            const perDay = boostedPerSecond * 86400; // 60 * 60 * 24
+            const perWeek = perDay * 7;
             const perMonth = perDay * 30;
-            const perYear = perDay * 365.25;
+            const perYear = perDay * 365.25; // Account for leap years
 
             // Format and display
-            document.getElementById('res-sec').textContent = '$' + boostedPerSecond.toFixed(10);
-            document.getElementById('res-hour').textContent = '$' + perHour.toFixed(4);
             document.getElementById('res-day').textContent = '$' + perDay.toFixed(4);
+            document.getElementById('res-week').textContent = '$' + perWeek.toFixed(4);
             document.getElementById('res-month').textContent = '$' + perMonth.toFixed(2);
             document.getElementById('res-year').textContent = '$' + perYear.toFixed(2);
 
             document.getElementById('results').style.display = 'block';
         }
-
-        // Run calculation on initial load
-        calculateEarnings();
     </script>
 </body>
 </html>
