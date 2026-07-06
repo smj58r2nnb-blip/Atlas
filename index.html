@@ -2,298 +2,580 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Atlas Earth</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Atlas Earth Dashboard</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
+    
     <style>
-        /* This fixes the overflow issue */
+        /* ==========================================
+           Atlas Earth Dashboard Styles
+        ========================================== */
         * {
+            margin: 0;
+            padding: 0;
             box-sizing: border-box;
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
         }
 
         body {
-            background-color: #f8f9fa;
-            margin: 0;
-            padding: 15px;
-            color: #333;
-            display: flex;
-            justify-content: center;
+            font-family: 'Poppins', sans-serif;
+            background: linear-gradient(135deg, #071b2d, #0f3d5d, #1f7a3d);
+            color: #fff;
+            min-height: 100vh;
+        }
+
+        header {
+            text-align: center;
+            padding: 40px 20px;
+        }
+
+        header h1 {
+            font-size: 3rem;
+            margin-bottom: 10px;
+        }
+
+        header p {
+            opacity: .8;
         }
 
         .container {
-            width: 100%;
-            max-width: 400px;
-            background: #ffffff;
-            padding: 24px;
-            border-radius: 12px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.08);
-        }
-
-        h1 {
-            text-align: center;
-            font-size: 1.4rem;
-            margin: 0 0 20px 0;
-            color: #2c3e50;
-        }
-
-        .upload-section {
-            background: #f1f3f5;
-            border: 2px dashed #adb5bd;
-            padding: 16px;
-            text-align: center;
-            border-radius: 8px;
-            margin-bottom: 24px;
-        }
-
-        .upload-section input[type="file"] {
-            display: none;
-        }
-
-        .upload-btn {
-            background-color: #4CAF50;
-            color: white;
-            padding: 10px 16px;
-            border-radius: 6px;
-            cursor: pointer;
-            font-weight: 600;
-            font-size: 0.9rem;
-            display: inline-block;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            width: 100%;
-        }
-
-        #status {
-            margin-top: 12px;
-            font-size: 0.85rem;
-            font-weight: 500;
-            color: #6c757d;
-        }
-
-        .input-grid {
+            width: 95%;
+            max-width: 1300px;
+            margin: auto;
             display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 16px;
-            margin-bottom: 24px;
+            gap: 25px;
+            padding-bottom: 50px;
         }
 
-        .input-group {
+        .profile {
             display: flex;
-            flex-direction: column;
+            align-items: center;
+            gap: 25px;
+            background: rgba(255, 255, 255, .08);
+            backdrop-filter: blur(18px);
+            border-radius: 20px;
+            padding: 25px;
+            box-shadow: 0 15px 40px rgba(0, 0, 0, .4);
         }
 
-        .full-width {
-            grid-column: span 2;
+        .profile img {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            border: 4px solid #00ff88;
+            object-fit: cover;
         }
 
-        label {
-            font-size: 0.8rem;
-            font-weight: 700;
-            margin-bottom: 6px;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
+        .cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+            gap: 25px;
         }
 
-        input[type="number"] {
+        .card {
+            background: rgba(255, 255, 255, .08);
+            backdrop-filter: blur(18px);
+            border-radius: 20px;
+            padding: 25px;
+            box-shadow: 0 12px 35px rgba(0, 0, 0, .35);
+            transition: .3s;
+            animation: fadeIn .8s ease;
+        }
+
+        .card:hover {
+            transform: translateY(-6px);
+            box-shadow: 0 20px 45px rgba(0, 0, 0, .5);
+        }
+
+        .card h1 {
+            color: #00ff88;
+            margin-top: 10px;
+            font-size: 2rem;
+        }
+
+        .card h2 {
+            margin-bottom: 20px;
+        }
+
+        .card h3 {
+            opacity: .9;
+        }
+
+        table {
             width: 100%;
+            border-collapse: collapse;
+        }
+
+        td {
             padding: 12px;
-            font-size: 1rem;
-            border: 1px solid #ced4da;
-            border-radius: 6px;
-            text-align: center;
-            background-color: #fff;
-            transition: border-color 0.2s;
+            border-bottom: 1px solid rgba(255, 255, 255, .12);
         }
 
-        input[type="number"]:focus {
-            outline: none;
-            border-color: #4CAF50;
-        }
-
-        button.calc-btn {
+        input[type=file] {
             width: 100%;
-            padding: 14px;
-            background-color: #2c3e50;
+            padding: 15px;
+            border-radius: 12px;
+            border: none;
+            background: #ffffff15;
+            color: #fff;
+            cursor: pointer;
+        }
+
+        input[type=file]::file-selector-button {
+            background: #00cc66;
             color: white;
             border: none;
-            border-radius: 6px;
-            font-size: 1rem;
-            font-weight: 700;
-            cursor: pointer;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
-
-        .results {
-            margin-top: 24px;
-            padding: 16px;
-            background: #f8f9fa;
+            padding: 10px 16px;
             border-radius: 8px;
-            border: 1px solid #e9ecef;
+            cursor: pointer;
+            margin-right: 15px;
         }
 
-        .result-row {
+        .bar {
+            width: 100%;
+            height: 22px;
+            background: #233646;
+            border-radius: 20px;
+            overflow: hidden;
+            margin: 10px 0 18px;
+        }
+
+        .common, .rare, .epic, .legendary {
+            height: 100%;
+            transition: width 1s ease;
+        }
+
+        .common { background: #7f8c8d; width: 50%; }
+        .rare { background: #3498db; width: 32%; }
+        .epic { background: #9b59b6; width: 14%; }
+        .legendary { background: #f1c40f; width: 4%; }
+
+        #dropArea {
+            margin-top: 25px;
+            border: 3px dashed #00ff88;
+            border-radius: 20px;
+            padding: 35px;
+            text-align: center;
+            transition: .3s;
+            background: rgba(255, 255, 255, .04);
+        }
+
+        #dropArea.drag {
+            background: rgba(0, 255, 136, .18);
+            border-color: #00ffaa;
+            transform: scale(1.02);
+        }
+
+        #dropArea h2 { margin-bottom: 10px; }
+        #dropArea p { opacity: .8; }
+
+        #preview {
+            display: block;
+            max-width: 100%;
+            margin: 25px auto 0;
+            border-radius: 15px;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, .5);
+        }
+
+        #progressContainer {
+            width: 100%;
+            height: 24px;
+            margin-top: 20px;
+            border-radius: 20px;
+            overflow: hidden;
+            background: #2a3947;
+        }
+
+        #progressBar {
+            width: 0%;
+            height: 100%;
+            background: linear-gradient(90deg, #00ff88, #00c853);
+            color: white;
+            font-weight: bold;
             display: flex;
-            justify-content: space-between;
-            padding: 8px 0;
-            font-size: 0.95rem;
-            border-bottom: 1px solid #e9ecef;
+            justify-content: center;
+            align-items: center;
+            transition: width .2s;
         }
 
-        .result-row:last-child {
-            border-bottom: none;
-            padding-bottom: 0;
-            font-weight: 700;
-            font-size: 1.1rem;
-            color: #4CAF50;
-            padding-top: 12px;
+        .toast {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            background: #00cc66;
+            color: white;
+            padding: 18px 24px;
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, .4);
+            animation: fadeIn .5s;
+            z-index: 9999;
         }
 
-        /* Label Colors */
-        .lbl-common { color: #4CAF50; }
-        .lbl-rare { color: #2196F3; }
-        .lbl-epic { color: #9C27B0; }
-        .lbl-legendary { color: #FFC107; }
-        .lbl-boost { color: #343a40; }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @media(max-width: 768px) {
+            .profile { flex-direction: column; text-align: center; }
+            header h1 { font-size: 2rem; }
+            .card h1 { font-size: 1.5rem; }
+            .container { width: 94%; }
+        }
     </style>
 </head>
 <body>
 
+    <header>
+        <div class="logo">
+            <h1>🌍 Atlas Earth Dashboard</h1>
+            <p>GitHub Companion</p>
+        </div>
+        <div class="header-right">
+            <div id="clock"></div>
+        </div>
+    </header>
+
     <div class="container">
-        <h1>Atlas Earnings</h1>
-
-        <div class="upload-section">
-            <label class="upload-btn">
-                Upload Screenshot
-                <input type="file" accept="image/*" onchange="processImage(event)">
-            </label>
-            <div id="status">Auto-fill your stats</div>
-        </div>
-        
-        <div class="input-grid">
-            <div class="input-group">
-                <label class="lbl-common">Common</label>
-                <input type="number" id="common" value="0" min="0">
-            </div>
-            <div class="input-group">
-                <label class="lbl-rare">Rare</label>
-                <input type="number" id="rare" value="0" min="0">
-            </div>
-            <div class="input-group">
-                <label class="lbl-epic">Epic</label>
-                <input type="number" id="epic" value="0" min="0">
-            </div>
-            <div class="input-group">
-                <label class="lbl-legendary">Legend</label>
-                <input type="number" id="legendary" value="0" min="0">
-            </div>
-            <div class="input-group full-width">
-                <label class="lbl-boost">Badge Boost (%)</label>
-                <input type="number" id="boost" value="0" min="0">
+        <div class="profile">
+            <img id="avatar" src="https://placehold.co/150x150/1e293b/ffffff?text=AE" alt="Avatar">
+            <div>
+                <h2>MOODYB</h2>
+                <p>👑 Mayor of Stenson Fields</p>
             </div>
         </div>
 
-        <button class="calc-btn" onclick="calculateEarnings()">Calculate</button>
+        <div class="cards">
+            <div class="card">
+                <h3>📈 Daily Earnings</h3>
+                <h1 id="dailyEarnings">$0.00</h1>
+            </div>
+            <div class="card">
+                <h3>🎯 Next $10</h3>
+                <h1 id="nextTen">Calculating...</h1>
+            </div>
+            <div class="card">
+                <h3>⚡ Rent / Second</h3>
+                <h1 id="rentSecond">$0.00000000</h1>
+            </div>
+        </div>
 
-        <div class="results" id="results" style="display: none;">
-            <div class="result-row">
-                <span>Per Day:</span>
-                <span id="res-day">$0.00</span>
+        <div class="cards">
+            <div class="card">
+                <h3>Current Income</h3>
+                <h1 id="income">$6.15229263</h1>
             </div>
-            <div class="result-row">
-                <span>Per Week:</span>
-                <span id="res-week">$0.00</span>
+            <div class="card">
+                <h3>Total Rent Earned</h3>
+                <h1 id="rent">$15.15226684</h1>
             </div>
-            <div class="result-row">
-                <span>Per Month:</span>
-                <span id="res-month">$0.00</span>
+        </div>
+
+        <div class="card">
+            <h2>📸 Upload Screenshot</h2>
+            <input type="file" id="upload" accept="image/*">
+            <p style="margin-top: 10px;">Upload an Atlas Earth screenshot to automatically update your dashboard.</p>
+        </div>
+
+        <div class="cards">
+            <div class="card">
+                <h2>Parcel Statistics</h2>
+                <table>
+                    <tr><td>Total Parcels</td><td id="total">104</td></tr>
+                    <tr><td>Common</td><td id="common">52</td></tr>
+                    <tr><td>Rare</td><td id="rare">33</td></tr>
+                    <tr><td>Epic</td><td id="epic">15</td></tr>
+                    <tr><td>Legendary</td><td id="legendary">4</td></tr>
+                    <tr><td>Badge Boost</td><td id="boostDisplay">10%</td></tr>
+                </table>
             </div>
-            <div class="result-row">
-                <span>Per Year:</span>
-                <span id="res-year">$0.00</span>
+
+            <div class="card">
+                <h2>Estimated Income</h2>
+                <table>
+                    <tr><td>Per Hour</td><td id="hour">$0.00</td></tr>
+                    <tr><td>Per Day</td><td id="day">$0.00</td></tr>
+                    <tr><td>Per Month</td><td id="month">$0.00</td></tr>
+                    <tr><td>Per Year</td><td id="year">$0.00</td></tr>
+                </table>
             </div>
+        </div>
+
+        <div class="cards">
+            <div class="card">
+                <h2>📈 Earnings History</h2>
+                <canvas id="earningsChart"></canvas>
+            </div>
+
+            <div class="card">
+                <h2>🏆 Milestones</h2>
+                <table>
+                    <tr><td>$10</td><td id="goal10"></td></tr>
+                    <tr><td>$25</td><td id="goal25"></td></tr>
+                    <tr><td>$50</td><td id="goal50"></td></tr>
+                    <tr><td>$100</td><td id="goal100"></td></tr>
+                    <tr><td>$500</td><td id="goal500"></td></tr>
+                    <tr><td>$1000</td><td id="goal1000"></td></tr>
+                </table>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>Parcel Breakdown</h2>
+            <p>Common</p>
+            <div class="bar"><div class="common" id="commonBar"></div></div>
+            <p>Rare</p>
+            <div class="bar"><div class="rare" id="rareBar"></div></div>
+            <p>Epic</p>
+            <div class="bar"><div class="epic" id="epicBar"></div></div>
+            <p>Legendary</p>
+            <div class="bar"><div class="legendary" id="legendaryBar"></div></div>
         </div>
     </div>
 
     <script>
-        const RATES = {
+        // =======================================
+        // State Management & Logic
+        // =======================================
+        const stats = {
+            currentIncome: 6.15229263,
+            totalRent: 15.15226684,
+            common: 52,
+            rare: 33,
+            epic: 15,
+            legendary: 4,
+            boost: 10
+        };
+
+        const rates = {
             common: 0.0000000011,
             rare: 0.0000000016,
             epic: 0.0000000022,
             legendary: 0.0000000044
         };
 
-        async function processImage(event) {
-            const file = event.target.files[0];
-            if (!file) return;
+        function totalParcels() {
+            return stats.common + stats.rare + stats.epic + stats.legendary;
+        }
 
-            const statusEl = document.getElementById('status');
-            statusEl.textContent = "Scanning image...";
-            statusEl.style.color = "#FF9800";
+        function rentPerSecond() {
+            let base = (stats.common * rates.common) + 
+                       (stats.rare * rates.rare) + 
+                       (stats.epic * rates.epic) + 
+                       (stats.legendary * rates.legendary);
+            return base * (1 + (stats.boost / 100));
+        }
 
-            try {
-                const result = await Tesseract.recognize(file, 'eng');
-                const text = result.data.text.toUpperCase();
-                
-                // Updated Regex to account for line breaks between the number and the label
-                const commonMatch = text.match(/(\d+)[\s\n]*COMMON/);
-                const rareMatch = text.match(/(\d+)[\s\n]*RARE/);
-                const epicMatch = text.match(/(\d+)[\s\n]*EPIC/);
-                const legMatch = text.match(/(\d+)[\s\n]*LEGENDARY/);
-                const boostMatch = text.match(/BADGES:\s*(\d+)%/);
+        function money(value) {
+            return "$" + value.toFixed(8);
+        }
 
-                let updated = false;
+        function updateIncome() {
+            let second = rentPerSecond();
+            document.getElementById("hour").innerHTML = money(second * 3600);
+            document.getElementById("day").innerHTML = money(second * 86400);
+            document.getElementById("month").innerHTML = money(second * 86400 * 30);
+            document.getElementById("year").innerHTML = money(second * 86400 * 365);
+        }
 
-                if (commonMatch) { document.getElementById('common').value = commonMatch[1]; updated = true; }
-                if (rareMatch) { document.getElementById('rare').value = rareMatch[1]; updated = true; }
-                if (epicMatch) { document.getElementById('epic').value = epicMatch[1]; updated = true; }
-                if (legMatch) { document.getElementById('legendary').value = legMatch[1]; updated = true; }
-                if (boostMatch) { document.getElementById('boost').value = boostMatch[1]; updated = true; }
+        function updateBars() {
+            let total = totalParcels();
+            if(total === 0) return;
+            document.getElementById("commonBar").style.width = (stats.common / total * 100) + "%";
+            document.getElementById("rareBar").style.width = (stats.rare / total * 100) + "%";
+            document.getElementById("epicBar").style.width = (stats.epic / total * 100) + "%";
+            document.getElementById("legendaryBar").style.width = (stats.legendary / total * 100) + "%";
+        }
 
-                if (updated) {
-                    statusEl.textContent = "Stats updated!";
-                    statusEl.style.color = "#4CAF50";
-                    calculateEarnings();
-                } else {
-                    statusEl.textContent = "Couldn't find numbers. Please enter manually.";
-                    statusEl.style.color = "#e53935";
-                }
+        function updateNumbers() {
+            document.getElementById("income").innerHTML = money(stats.currentIncome);
+            document.getElementById("rent").innerHTML = money(stats.totalRent);
+            document.getElementById("total").innerHTML = totalParcels();
+            document.getElementById("common").innerHTML = stats.common;
+            document.getElementById("rare").innerHTML = stats.rare;
+            document.getElementById("epic").innerHTML = stats.epic;
+            document.getElementById("legendary").innerHTML = stats.legendary;
+            document.getElementById("boostDisplay").innerHTML = stats.boost + "%";
+        }
 
-            } catch (error) {
-                console.error(error);
-                statusEl.textContent = "Error reading image.";
-                statusEl.style.color = "#e53935";
+        function save() {
+            localStorage.setItem("atlasDashboard", JSON.stringify(stats));
+        }
+
+        function load() {
+            let saved = localStorage.getItem("atlasDashboard");
+            if(saved) Object.assign(stats, JSON.parse(saved));
+        }
+
+        function formatTime(seconds) {
+            if(seconds <= 0) return "Complete";
+            let days = Math.floor(seconds / 86400);
+            let hours = Math.floor((seconds % 86400) / 3600);
+            let mins = Math.floor((seconds % 3600) / 60);
+            return `${days}d ${hours}h ${mins}m`;
+        }
+
+        function updateDashboard() {
+            const second = rentPerSecond();
+            document.getElementById("rentSecond").innerHTML = money(second);
+            document.getElementById("dailyEarnings").innerHTML = money(second * 86400);
+            
+            const goals = [10, 25, 50, 100, 500, 1000];
+            goals.forEach(goal => {
+                const el = document.getElementById("goal" + goal);
+                if(!el) return;
+                const remaining = goal - stats.currentIncome;
+                el.innerHTML = remaining <= 0 ? "✅ Reached" : formatTime(remaining / second);
+            });
+
+            const next = document.getElementById("nextTen");
+            if(next) {
+                const remain = 10 - stats.currentIncome;
+                next.innerHTML = remain <= 0 ? "Reached" : formatTime(remain / second);
             }
         }
 
-        function calculateEarnings() {
-            const common = parseInt(document.getElementById('common').value) || 0;
-            const rare = parseInt(document.getElementById('rare').value) || 0;
-            const epic = parseInt(document.getElementById('epic').value) || 0;
-            const legendary = parseInt(document.getElementById('legendary').value) || 0;
-            const boostPercent = parseFloat(document.getElementById('boost').value) || 0;
-
-            let basePerSecond = 
-                (common * RATES.common) +
-                (rare * RATES.rare) +
-                (epic * RATES.epic) +
-                (legendary * RATES.legendary);
-
-            let boostedPerSecond = basePerSecond * (1 + (boostPercent / 100));
-
-            const perDay = boostedPerSecond * 86400;
-            const perWeek = perDay * 7;
-            const perMonth = perDay * 30;
-            const perYear = perDay * 365.25;
-
-            document.getElementById('res-day').textContent = '$' + perDay.toFixed(4);
-            document.getElementById('res-week').textContent = '$' + perWeek.toFixed(4);
-            document.getElementById('res-month').textContent = '$' + perMonth.toFixed(2);
-            document.getElementById('res-year').textContent = '$' + perYear.toFixed(2);
-
-            document.getElementById('results').style.display = 'block';
+        function liveCounter() {
+            stats.currentIncome += rentPerSecond();
+            stats.totalRent += rentPerSecond();
+            updateNumbers();
+            updateDashboard();
+            save();
         }
+
+        // =======================================
+        // OCR Engine
+        // =======================================
+        const uploadInput = document.getElementById("upload");
+        const dropArea = document.createElement("div");
+        dropArea.id = "dropArea";
+        dropArea.innerHTML = `
+            <h2>📸 Drop Atlas Earth Screenshot Here</h2>
+            <p>or click above to browse</p>
+            <div id="progressContainer"><div id="progressBar"></div></div>
+            <img id="preview" style="display:none;">
+        `;
+        uploadInput.parentNode.appendChild(dropArea);
+
+        function updateProgress(percent) {
+            const bar = document.getElementById("progressBar");
+            if(bar) {
+                bar.style.width = percent + "%";
+                bar.innerHTML = Math.floor(percent) + "%";
+            }
+        }
+
+        dropArea.addEventListener("dragover", (e) => { e.preventDefault(); dropArea.classList.add("drag"); });
+        dropArea.addEventListener("dragleave", () => dropArea.classList.remove("drag"));
+        dropArea.addEventListener("drop", (e) => {
+            e.preventDefault();
+            dropArea.classList.remove("drag");
+            processImage(e.dataTransfer.files[0]);
+        });
+        uploadInput.addEventListener("change", (e) => processImage(e.target.files[0]));
+
+        async function processImage(file) {
+            if(!file) return;
+            const preview = document.getElementById("preview");
+            preview.src = URL.createObjectURL(file);
+            preview.style.display = "block";
+            updateProgress(0);
+
+            try {
+                const result = await Tesseract.recognize(file, "eng", {
+                    logger: m => { if(m.status === "recognizing text") updateProgress(m.progress * 100); }
+                });
+                parseAtlas(result.data.text.toUpperCase());
+            } catch (err) {
+                console.error("OCR Error", err);
+            }
+        }
+
+        function parseAtlas(text) {
+            const moneyMatch = text.match(/\$(\d+\.\d+)/);
+            const commonMatch = text.match(/(\d+)[\s\n]*COMMON/);
+            const rareMatch = text.match(/(\d+)[\s\n]*RARE/);
+            const epicMatch = text.match(/(\d+)[\s\n]*EPIC/);
+            const legMatch = text.match(/(\d+)[\s\n]*LEGENDARY/);
+            const boostMatch = text.match(/BADGES:\s*(\d+)%/);
+
+            if(moneyMatch) stats.currentIncome = parseFloat(moneyMatch[1]);
+            if(commonMatch) stats.common = parseInt(commonMatch[1]);
+            if(rareMatch) stats.rare = parseInt(rareMatch[1]);
+            if(epicMatch) stats.epic = parseInt(epicMatch[1]);
+            if(legMatch) stats.legendary = parseInt(legMatch[1]);
+            if(boostMatch) stats.boost = parseInt(boostMatch[1]);
+
+            updateNumbers();
+            updateIncome();
+            updateBars();
+            save();
+            showToast();
+        }
+
+        function showToast() {
+            let toast = document.createElement("div");
+            toast.className = "toast";
+            toast.innerHTML = "✅ Atlas Earth stats updated";
+            document.body.appendChild(toast);
+            setTimeout(() => toast.remove(), 3000);
+        }
+
+        // =======================================
+        // Chart.js Setup
+        // =======================================
+        let earningsHistory = JSON.parse(localStorage.getItem("earningsHistory")) || [];
+
+        function saveHistory() {
+            earningsHistory.push({
+                date: new Date().toLocaleTimeString(),
+                income: stats.currentIncome
+            });
+            if(earningsHistory.length > 20) earningsHistory.shift();
+            localStorage.setItem("earningsHistory", JSON.stringify(earningsHistory));
+        }
+
+        const ctx = document.getElementById("earningsChart");
+        const chart = new Chart(ctx, {
+            type: "line",
+            data: {
+                labels: earningsHistory.map(x => x.date),
+                datasets: [{
+                    label: "Live Income",
+                    data: earningsHistory.map(x => x.income),
+                    tension: .35,
+                    fill: true,
+                    borderColor: '#00ff88',
+                    backgroundColor: 'rgba(0, 255, 136, 0.1)',
+                    borderWidth: 3
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: { legend: { labels: { color: "white" } } },
+                scales: {
+                    x: { ticks: { color: "white" } },
+                    y: { ticks: { color: "white" } }
+                }
+            }
+        });
+
+        setInterval(() => {
+            saveHistory();
+            chart.data.labels = earningsHistory.map(x => x.date);
+            chart.data.datasets[0].data = earningsHistory.map(x => x.income);
+            chart.update();
+        }, 10000); // Updates chart every 10 seconds for a more "live" feel
+
+        // Initialize App
+        load();
+        updateNumbers();
+        updateIncome();
+        updateBars();
+        updateDashboard();
+        setInterval(liveCounter, 1000);
     </script>
 </body>
 </html>
