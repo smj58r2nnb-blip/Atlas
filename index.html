@@ -7,7 +7,6 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
     
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -48,25 +47,26 @@
         table { width: 100%; border-collapse: collapse; }
         td { padding: 12px; border-bottom: 1px solid rgba(255, 255, 255, .12); }
         
-        /* Interactive Edit Styles */
-        .editable { cursor: pointer; position: relative; display: inline-block; transition: 0.2s; }
-        .editable:hover { color: #ffffff; text-shadow: 0 0 10px #00ff88; }
-        .editable::after {
-            content: "✏️ Tap to edit"; position: absolute; top: -25px; left: 50%; transform: translateX(-50%);
-            font-size: 0.75rem; background: #000000dd; padding: 4px 10px; border-radius: 5px; color: #00ff88;
-            opacity: 0; pointer-events: none; transition: 0.2s; white-space: nowrap;
+        /* Input Form Styles */
+        .input-grid {
+            display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 15px;
         }
-        .editable:hover::after { opacity: 1; top: -30px; }
+        .input-group { display: flex; flex-direction: column; }
+        .input-group label { font-size: 0.85rem; opacity: 0.8; margin-bottom: 5px; }
+        .input-group input {
+            padding: 12px; border-radius: 8px; border: 1px solid rgba(0, 255, 136, 0.4);
+            background: rgba(0, 0, 0, 0.3); color: white; font-family: 'Poppins', sans-serif;
+            font-size: 1rem; outline: none; transition: 0.2s;
+        }
+        .input-group input:focus { border-color: #00ff88; background: rgba(0, 0, 0, 0.5); }
+        .full-width { grid-column: span 2; }
+        .btn-update {
+            grid-column: span 2; padding: 15px; border-radius: 12px; background: #00cc66;
+            color: white; font-weight: bold; font-size: 1.1rem; border: none; cursor: pointer;
+            transition: 0.2s; margin-top: 10px; font-family: 'Poppins', sans-serif;
+        }
+        .btn-update:hover { background: #00ff88; color: #071b2d; transform: translateY(-2px); box-shadow: 0 5px 15px rgba(0,255,136,0.3); }
 
-        input[type=file] {
-            width: 100%; padding: 15px; border-radius: 12px; border: none;
-            background: #ffffff15; color: #fff; cursor: pointer;
-            margin-bottom: 10px;
-        }
-        input[type=file]::file-selector-button {
-            background: #00cc66; color: white; border: none;
-            padding: 10px 16px; border-radius: 8px; cursor: pointer; margin-right: 15px;
-        }
         .bar {
             width: 100%; height: 22px; background: #233646;
             border-radius: 20px; overflow: hidden; margin: 10px 0 18px;
@@ -77,33 +77,6 @@
         .epic { background: #9b59b6; width: 14%; }
         .legendary { background: #f1c40f; width: 4%; }
         
-        #dropArea {
-            margin-top: 15px; border: 3px dashed #00ff88; border-radius: 20px;
-            padding: 35px; text-align: center; transition: .3s; background: rgba(255, 255, 255, .04);
-            cursor: pointer;
-        }
-        #dropArea.drag { background: rgba(0, 255, 136, .18); border-color: #00ffaa; transform: scale(1.02); }
-        #dropArea h2 { margin-bottom: 10px; font-size: 1.5rem; }
-        #dropArea p { opacity: .8; }
-        #preview {
-            display: block; max-width: 100%; margin: 25px auto 0;
-            border-radius: 15px; box-shadow: 0 15px 35px rgba(0, 0, 0, .5);
-        }
-        #progressContainer {
-            width: 100%; height: 30px; margin-top: 20px;
-            border-radius: 20px; overflow: hidden; background: #2a3947;
-        }
-        #progressBar {
-            width: 0%; height: 100%; background: linear-gradient(90deg, #00ff88, #00c853);
-            color: white; font-weight: bold; display: flex;
-            justify-content: center; align-items: center; transition: width .3s;
-            font-size: 0.9rem; white-space: nowrap;
-        }
-        #debugBox {
-            display: none; margin-top: 20px; padding: 15px; background: rgba(0,0,0,0.4);
-            border-radius: 10px; font-size: 0.75rem; color: #ffeb3b; text-align: left;
-            word-wrap: break-word; overflow-y: auto; max-height: 150px;
-        }
         .toast {
             position: fixed; bottom: 30px; right: 30px; background: #00cc66;
             color: white; padding: 18px 24px; border-radius: 12px;
@@ -118,6 +91,8 @@
             header h1 { font-size: 2rem; }
             .card h1 { font-size: 1.5rem; }
             .container { width: 94%; }
+            .input-grid { grid-template-columns: 1fr; }
+            .full-width, .btn-update { grid-column: span 1; }
         }
     </style>
 </head>
@@ -126,7 +101,7 @@
     <header>
         <div class="logo">
             <h1>🌍 Atlas Earth Dashboard</h1>
-            <p>Hybrid Sync Edition</p>
+            <p>Manual Control Edition</p>
         </div>
     </header>
 
@@ -157,24 +132,48 @@
         <div class="cards">
             <div class="card">
                 <h3>Current Income</h3>
-                <h1 id="income" class="editable" onclick="manualEdit('currentIncome')">$6.15229263</h1>
+                <h1 id="income">$6.15229263</h1>
             </div>
             <div class="card">
                 <h3>Total Rent Earned</h3>
-                <h1 id="rent" class="editable" onclick="manualEdit('totalRent')">$15.15226684</h1>
+                <h1 id="rent">$15.15226684</h1>
             </div>
         </div>
 
         <div class="card">
-            <h2>📸 Upload Screenshot</h2>
-            <p style="margin-bottom: 10px; font-size: 0.9rem; opacity: 0.8;">Upload to update Parcels & Badges. Tap your money above to edit manually if the scan fails!</p>
-            <input type="file" id="upload" accept="image/*">
-            <div id="dropArea">
-                <h2>📸 Drop Screenshot Here</h2>
-                <p>or click above to browse</p>
-                <div id="progressContainer"><div id="progressBar">Ready to Scan</div></div>
-                <div id="debugBox"></div>
-                <img id="preview" style="display:none;">
+            <h2>⚙️ Manual Update Panel</h2>
+            <p style="font-size: 0.9rem; opacity: 0.8;">Enter your latest stats to instantly recalibrate the dashboard.</p>
+            
+            <div class="input-grid">
+                <div class="input-group">
+                    <label>Current Income ($)</label>
+                    <input type="number" id="inpIncome" step="0.00000001">
+                </div>
+                <div class="input-group">
+                    <label>Total Rent Accrued ($)</label>
+                    <input type="number" id="inpRent" step="0.00000001">
+                </div>
+                <div class="input-group">
+                    <label>Common Parcels</label>
+                    <input type="number" id="inpCommon">
+                </div>
+                <div class="input-group">
+                    <label>Rare Parcels</label>
+                    <input type="number" id="inpRare">
+                </div>
+                <div class="input-group">
+                    <label>Epic Parcels</label>
+                    <input type="number" id="inpEpic">
+                </div>
+                <div class="input-group">
+                    <label>Legendary Parcels</label>
+                    <input type="number" id="inpLegendary">
+                </div>
+                <div class="input-group full-width">
+                    <label>Badge Boost (%)</label>
+                    <input type="number" id="inpBoost">
+                </div>
+                <button class="btn-update" onclick="saveManualData()">Sync Dashboard Data</button>
             </div>
         </div>
 
@@ -282,25 +281,43 @@
             return "$" + value.toFixed(8);
         }
 
-        // --- NEW: Manual Edit Function ---
-        function manualEdit(type) {
-            let currentVal = type === 'currentIncome' ? stats.currentIncome : stats.totalRent;
-            let promptText = type === 'currentIncome' ? "Update Current Income ($):" : "Update Total Rent Earned ($):";
-            
-            let newVal = prompt(promptText, currentVal.toFixed(8));
-            
-            if (newVal !== null) {
-                let parsedVal = parseFloat(newVal.replace(/[^\d.-]/g, ''));
-                if (!isNaN(parsedVal)) {
-                    stats[type] = parsedVal;
-                    updateNumbers();
-                    updateIncome();
-                    save();
-                    showToast("✅ Manual update saved!");
-                } else {
-                    showToast("❌ Invalid number entered.");
-                }
-            }
+        // --- MANAUAL UPDATE LOGIC ---
+        function populateInputs() {
+            document.getElementById("inpIncome").value = stats.currentIncome.toFixed(8);
+            document.getElementById("inpRent").value = stats.totalRent.toFixed(8);
+            document.getElementById("inpCommon").value = stats.common;
+            document.getElementById("inpRare").value = stats.rare;
+            document.getElementById("inpEpic").value = stats.epic;
+            document.getElementById("inpLegendary").value = stats.legendary;
+            document.getElementById("inpBoost").value = stats.boost;
+        }
+
+        function saveManualData() {
+            // Grab values from inputs
+            let newIncome = parseFloat(document.getElementById("inpIncome").value);
+            let newRent = parseFloat(document.getElementById("inpRent").value);
+            let newCommon = parseInt(document.getElementById("inpCommon").value);
+            let newRare = parseInt(document.getElementById("inpRare").value);
+            let newEpic = parseInt(document.getElementById("inpEpic").value);
+            let newLegendary = parseInt(document.getElementById("inpLegendary").value);
+            let newBoost = parseInt(document.getElementById("inpBoost").value);
+
+            // Validate and save
+            if(!isNaN(newIncome)) stats.currentIncome = newIncome;
+            if(!isNaN(newRent)) stats.totalRent = newRent;
+            if(!isNaN(newCommon)) stats.common = newCommon;
+            if(!isNaN(newRare)) stats.rare = newRare;
+            if(!isNaN(newEpic)) stats.epic = newEpic;
+            if(!isNaN(newLegendary)) stats.legendary = newLegendary;
+            if(!isNaN(newBoost)) stats.boost = newBoost;
+
+            // Trigger visual updates
+            updateNumbers();
+            updateIncome();
+            updateBars();
+            updateDashboard();
+            save();
+            showToast("✅ Dashboard Successfully Calibrated!");
         }
 
         function updateIncome() {
@@ -354,6 +371,7 @@
             document.getElementById("legendary").innerHTML = stats.legendary;
             document.getElementById("boostDisplay").innerHTML = stats.boost + "%";
             updateStrategy();
+            populateInputs(); // Keeps the forms showing the latest live numbers
         }
 
         function save() {
@@ -401,109 +419,6 @@
             save();
         }
 
-        // =======================================
-        // OCR Engine
-        // =======================================
-        const uploadInput = document.getElementById("upload");
-        const dropArea = document.getElementById("dropArea");
-        const debugBox = document.getElementById("debugBox");
-
-        function updateProgress(percent, text) {
-            const bar = document.getElementById("progressBar");
-            if(bar) {
-                bar.style.width = percent + "%";
-                bar.innerHTML = text;
-            }
-        }
-
-        dropArea.addEventListener("dragover", (e) => { e.preventDefault(); dropArea.classList.add("drag"); });
-        dropArea.addEventListener("dragleave", () => dropArea.classList.remove("drag"));
-        dropArea.addEventListener("drop", (e) => {
-            e.preventDefault();
-            dropArea.classList.remove("drag");
-            processImage(e.dataTransfer.files[0]);
-        });
-        uploadInput.addEventListener("change", (e) => processImage(e.target.files[0]));
-
-        async function processImage(file) {
-            if(!file) return;
-            const preview = document.getElementById("preview");
-            preview.src = URL.createObjectURL(file);
-            preview.style.display = "block";
-            debugBox.style.display = "none";
-            
-            const bar = document.getElementById("progressBar");
-            bar.style.background = "#00cc66";
-            updateProgress(15, "Scanning Image...");
-
-            try {
-                const result = await Tesseract.recognize(file, "eng", {
-                    logger: m => { if(m.status === "recognizing text") updateProgress(m.progress * 100, "Reading Text..."); }
-                });
-                parseAtlas(result.data.text);
-            } catch (err) {
-                bar.style.width = "100%";
-                bar.innerHTML = "Error: Image format or size.";
-                bar.style.background = "#ff4444";
-            }
-        }
-
-        function parseAtlas(text) {
-            let moneyUpdated = false;
-            let parcelsUpdated = false;
-
-            let mText = text.replace(/\s+/g, '').replace(/(\d),(\d)/g, '$1.$2').replace(/[Oo]/g, '0').replace(/[lIi]/g, '1').replace(/[sS$]/g, '');
-            const moneyMatches = [...mText.matchAll(/(\d+\.\d{5,})/g)].map(m => parseFloat(m[1]));
-            
-            if (moneyMatches.length >= 2) {
-                stats.totalRent = Math.max(...moneyMatches);
-                stats.currentIncome = Math.min(...moneyMatches);
-                moneyUpdated = true;
-            } else if (moneyMatches.length === 1) {
-                if (moneyMatches[0] > stats.totalRent) {
-                    stats.totalRent = moneyMatches[0];
-                } else {
-                    stats.currentIncome = moneyMatches[0];
-                }
-                moneyUpdated = true;
-            }
-
-            const find = (kw) => {
-                const regex = new RegExp(kw + "\\s*\\D*(\\d+)|(\\d+)\\s*" + kw, "i");
-                const match = text.match(regex);
-                return match ? parseInt(match[1] || match[2]) : null;
-            };
-
-            const c = find("COMMON"); if (c !== null) { stats.common = c; parcelsUpdated = true; }
-            const r = find("RARE"); if (r !== null) { stats.rare = r; parcelsUpdated = true; }
-            const e = find("EPIC"); if (e !== null) { stats.epic = e; parcelsUpdated = true; }
-            const l = find("LEGENDARY"); if (l !== null) { stats.legendary = l; parcelsUpdated = true; }
-            const bMatch = text.match(/(\d+)%\s*BOOST|BADGES:?\s*(\d+)%/i);
-            if (bMatch) { stats.boost = parseInt(bMatch[1] || bMatch[2]); parcelsUpdated = true; }
-
-            const bar = document.getElementById("progressBar");
-            
-            if (moneyUpdated || parcelsUpdated) {
-                updateNumbers();
-                updateIncome();
-                updateBars();
-                save();
-                bar.style.width = "100%";
-                
-                if (moneyUpdated && parcelsUpdated) {
-                    bar.style.background = "linear-gradient(90deg, #00ff88, #00c853)";
-                    bar.innerHTML = "Scan Complete!";
-                    showToast("✅ Stats & Money updated!");
-                } else if (parcelsUpdated) {
-                    bar.style.background = "#ffc107"; 
-                    bar.innerHTML = "Parcels Updated (Money Failed)";
-                    showToast("⚠️ Parcels updated. Tap your money numbers above to edit manually!");
-                    debugBox.style.display = "block";
-                    debugBox.innerHTML = "<strong>OCR Debug Data (Screenshot this!):</strong><br>" + text.replace(/\n/g, '<br>');
-                }
-            }
-        }
-
         function showToast(msg) {
             let toast = document.createElement("div");
             toast.className = "toast";
@@ -512,9 +427,16 @@
             setTimeout(() => toast.remove(), 3500);
         }
 
+        // =======================================
+        // Chart.js Setup
+        // =======================================
         let earningsHistory = JSON.parse(localStorage.getItem("earningsHistory")) || [];
+
         function saveHistory() {
-            earningsHistory.push({ date: new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}), income: stats.currentIncome });
+            earningsHistory.push({
+                date: new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}),
+                income: stats.currentIncome
+            });
             if(earningsHistory.length > 20) earningsHistory.shift();
             localStorage.setItem("earningsHistory", JSON.stringify(earningsHistory));
         }
@@ -527,14 +449,20 @@
                 datasets: [{
                     label: "Live Income",
                     data: earningsHistory.map(x => x.income),
-                    tension: .35, fill: true, borderColor: '#00ff88',
-                    backgroundColor: 'rgba(0, 255, 136, 0.1)', borderWidth: 3
+                    tension: .35,
+                    fill: true,
+                    borderColor: '#00ff88',
+                    backgroundColor: 'rgba(0, 255, 136, 0.1)',
+                    borderWidth: 3
                 }]
             },
             options: {
                 responsive: true,
                 plugins: { legend: { labels: { color: "white" } } },
-                scales: { x: { ticks: { color: "white", maxTicksLimit: 6 } }, y: { ticks: { color: "white" } } }
+                scales: {
+                    x: { ticks: { color: "white", maxTicksLimit: 6 } },
+                    y: { ticks: { color: "white" } }
+                }
             }
         });
 
@@ -545,7 +473,9 @@
             chart.update();
         }, 60000);
 
+        // Initialize App
         load();
+        populateInputs();
         updateNumbers();
         updateIncome();
         updateBars();
