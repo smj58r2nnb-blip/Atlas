@@ -281,7 +281,7 @@
             return "$" + value.toFixed(8);
         }
 
-        // --- MANAUAL UPDATE LOGIC ---
+        // --- MANUAL UPDATE LOGIC ---
         function populateInputs() {
             document.getElementById("inpIncome").value = stats.currentIncome.toFixed(8);
             document.getElementById("inpRent").value = stats.totalRent.toFixed(8);
@@ -317,6 +317,7 @@
             updateBars();
             updateDashboard();
             save();
+            populateInputs(); // Refreshes the boxes with the newly saved static data
             showToast("✅ Dashboard Successfully Calibrated!");
         }
 
@@ -371,7 +372,7 @@
             document.getElementById("legendary").innerHTML = stats.legendary;
             document.getElementById("boostDisplay").innerHTML = stats.boost + "%";
             updateStrategy();
-            populateInputs(); // Keeps the forms showing the latest live numbers
+            // populateInputs() has been removed from here so you can type freely!
         }
 
         function save() {
@@ -475,7 +476,7 @@
 
         // Initialize App
         load();
-        populateInputs();
+        populateInputs(); // Fills the boxes with your saved data on first load
         updateNumbers();
         updateIncome();
         updateBars();
