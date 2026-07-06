@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Atlas Earth Calculator</title>
+    <style>
+        :root {
+            --bg-color: #f4f4f9;
+            --card-bg: #ffffff;
+            --primary-color: #2c3e50;
+            --accent-green: #4CAF50;
+            --border-radius: 10px;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-color);
+            margin: 0;
+            padding: 15px;
+            color: var(--primary-color);
+        }
+
+        .container {
+            max-width: 500px;
+            margin: 0 auto;
+            background: var(--card-bg);
+            padding: 20px;
+            border-radius: var(--border-radius);
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+        }
+
+        h1 {
+            text-align: center;
+            font-size: 1.5rem;
+            margin-top: 0;
+            color: var(--accent-green);
+        }
+
+        .input-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .input-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        label {
+            font-size: 0.85rem;
+            font-weight: 600;
+            margin-bottom: 5px;
+            text-transform: uppercase;
+        }
+
+        input {
+            padding: 10px;
+            font-size: 1rem;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            text-align: center;
+        }
+
+        .full-width {
+            grid-column: span 2;
+        }
+
+        button {
+            width: 100%;
+            padding: 12px;
+            background-color: var(--accent-green);
+            color: white;
+            border: none;
+            border-radius: 5px;
+            font-size: 1rem;
+            font-weight: bold;
+            cursor: pointer;
+            text-transform: uppercase;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        button:active {
+            background-color: #45a049;
+            transform: translateY(1px);
+        }
+
+        .results {
+            margin-top: 20px;
+            padding: 15px;
+            background: #e8f5e9;
+            border-radius: var(--border-radius);
+            border: 1px solid #c8e6c9;
+        }
+
+        .result-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+            border-bottom: 1px solid #c8e6c9;
+            font-size: 0.95rem;
+        }
+
+        .result-row:last-child {
+            border-bottom: none;
+            font-weight: bold;
+            font-size: 1.1rem;
+            color: var(--accent-green);
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h1>Atlas Earth Earnings</h1>
+        
+        <div class="input-grid">
+            <div class="input-group">
+                <label style="color: #4CAF50;">Common</label>
+                <input type="number" id="common" value="52" min="0">
+            </div>
+            <div class="input-group">
+                <label style="color: #2196F3;">Rare</label>
+                <input type="number" id="rare" value="33" min="0">
+            </div>
+            <div class="input-group">
+                <label style="color: #9C27B0;">Epic</label>
+                <input type="number" id="epic" value="15" min="0">
+            </div>
+            <div class="input-group">
+                <label style="color: #FFC107;">Legendary</label>
+                <input type="number" id="legendary" value="4" min="0">
+            </div>
+            <div class="input-group full-width">
+                <label>Badge Boost (%)</label>
+                <input type="number" id="boost" value="10" min="0">
+            </div>
+        </div>
+
+        <button onclick="calculateEarnings()">Calculate Rent</button>
+
+        <div class="results" id="results" style="display: none;">
+            <div class="result-row">
+                <span>Per Second:</span>
+                <span id="res-sec">$0.00</span>
+            </div>
+            <div class="result-row">
+                <span>Per Hour:</span>
+                <span id="res-hour">$0.00</span>
+            </div>
+            <div class="result-row">
+                <span>Per Day:</span>
+                <span id="res-day">$0.00</span>
+            </div>
+            <div class="result-row">
+                <span>Per Month (30 Days):</span>
+                <span id="res-month">$0.00</span>
+            </div>
+            <div class="result-row">
+                <span>Per Year:</span>
+                <span id="res-year">$0.00</span>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Rent rates per second from game data
+        const RATES = {
+            common: 0.0000000011,
+            rare: 0.0000000016,
+            epic: 0.0000000022,
+            legendary: 0.0000000044
+        };
+
+        function calculateEarnings() {
+            const common = parseInt(document.getElementById('common').value) || 0;
+            const rare = parseInt(document.getElementById('rare').value) || 0;
+            const epic = parseInt(document.getElementById('epic').value) || 0;
+            const legendary = parseInt(document.getElementById('legendary').value) || 0;
+            const boostPercent = parseFloat(document.getElementById('boost').value) || 0;
+
+            // Calculate base rent per second
+            let basePerSecond = 
+                (common * RATES.common) +
+                (rare * RATES.rare) +
+                (epic * RATES.epic) +
+                (legendary * RATES.legendary);
+
+            // Apply badge boost
+            let boostedPerSecond = basePerSecond * (1 + (boostPercent / 100));
+
+            // Time multipliers
+            const perHour = boostedPerSecond * 3600;
+            const perDay = perHour * 24;
+            const perMonth = perDay * 30;
+            const perYear = perDay * 365.25;
+
+            // Format and display
+            document.getElementById('res-sec').textContent = '$' + boostedPerSecond.toFixed(10);
+            document.getElementById('res-hour').textContent = '$' + perHour.toFixed(4);
+            document.getElementById('res-day').textContent = '$' + perDay.toFixed(4);
+            document.getElementById('res-month').textContent = '$' + perMonth.toFixed(2);
+            document.getElementById('res-year').textContent = '$' + perYear.toFixed(2);
+
+            document.getElementById('results').style.display = 'block';
+        }
+
+        // Run calculation on initial load
+        calculateEarnings();
+    </script>
+</body>
+</html>
