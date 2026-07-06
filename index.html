@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Atlas Earth</title>
+    <title>Atlas Earth Dashboard</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -50,6 +50,7 @@
         input[type=file] {
             width: 100%; padding: 15px; border-radius: 12px; border: none;
             background: #ffffff15; color: #fff; cursor: pointer;
+            margin-bottom: 10px;
         }
         input[type=file]::file-selector-button {
             background: #00cc66; color: white; border: none;
@@ -66,11 +67,12 @@
         .legendary { background: #f1c40f; width: 4%; }
         
         #dropArea {
-            margin-top: 25px; border: 3px dashed #00ff88; border-radius: 20px;
+            margin-top: 15px; border: 3px dashed #00ff88; border-radius: 20px;
             padding: 35px; text-align: center; transition: .3s; background: rgba(255, 255, 255, .04);
+            cursor: pointer;
         }
         #dropArea.drag { background: rgba(0, 255, 136, .18); border-color: #00ffaa; transform: scale(1.02); }
-        #dropArea h2 { margin-bottom: 10px; }
+        #dropArea h2 { margin-bottom: 10px; font-size: 1.5rem; }
         #dropArea p { opacity: .8; }
         #preview {
             display: block; max-width: 100%; margin: 25px auto 0;
@@ -84,6 +86,7 @@
             width: 0%; height: 100%; background: linear-gradient(90deg, #00ff88, #00c853);
             color: white; font-weight: bold; display: flex;
             justify-content: center; align-items: center; transition: width .2s;
+            font-size: 0.85rem; white-space: nowrap;
         }
         .toast {
             position: fixed; bottom: 30px; right: 30px; background: #00cc66;
@@ -148,8 +151,14 @@
 
         <div class="card">
             <h2>📸 Upload Screenshot</h2>
+            <p style="margin-bottom: 10px; font-size: 0.9rem; opacity: 0.8;">Upload your Player Info screenshot to instantly update your layout stats.</p>
             <input type="file" id="upload" accept="image/*">
-            <p style="margin-top: 10px; font-size: 0.9rem; opacity: 0.8;">Upload your Player Info screenshot to instantly update your layout stats.</p>
+            <div id="dropArea">
+                <h2>📸 Drop Screenshot Here</h2>
+                <p>or click above to browse</p>
+                <div id="progressContainer"><div id="progressBar"></div></div>
+                <img id="preview" style="display:none;">
+            </div>
         </div>
 
         <div class="cards">
@@ -355,18 +364,10 @@
         }
 
         // =======================================
-        // OCR Engine
+        // OCR Engine (Upgraded)
         // =======================================
         const uploadInput = document.getElementById("upload");
-        const dropArea = document.createElement("div");
-        dropArea.id = "dropArea";
-        dropArea.innerHTML = `
-            <h2>📸 Drop Atlas Earth Screenshot Here</h2>
-            <p>or click above to browse</p>
-            <div id="progressContainer"><div id="progressBar"></div></div>
-            <img id="preview" style="display:none;">
-        `;
-        uploadInput.parentNode.appendChild(dropArea);
+        const dropArea = document.getElementById("dropArea");
 
         function updateProgress(percent) {
             const bar = document.getElementById("progressBar");
@@ -390,7 +391,9 @@
             const preview = document.getElementById("preview");
             preview.src = URL.createObjectURL(file);
             preview.style.display = "block";
-            updateProgress(0);
+            
+            document.getElementById("progressBar").style.width = "10%";
+            document.getElementById("progressBar").innerHTML = "Scanning...";
 
             try {
                 const result = await Tesseract.recognize(file, "eng", {
@@ -399,43 +402,71 @@
                 parseAtlas(result.data.text.toUpperCase());
             } catch (err) {
                 console.error("OCR Error", err);
+                document.getElementById("progressBar").style.width = "100%";
+                document.getElementById("progressBar").innerHTML = "Error: Image format or size.";
+                document.getElementById("progressBar").style.background = "#ff4444";
             }
         }
 
         function parseAtlas(text) {
-            const moneyMatches = [...text.matchAll(/\$\s*(\d+\.\d+)/g)];
+            let updated = false;
+
+            // Money: Look for a decimal with at least 5 numbers after it, ignoring the $ sign
+            const moneyMatches = [...text.matchAll(/(?:[$S5s])?\s*(\d+\.\d{5,})/g)];
+            
             if (moneyMatches.length >= 2) {
                 let val1 = parseFloat(moneyMatches[0][1]);
                 let val2 = parseFloat(moneyMatches[1][1]);
                 stats.totalRent = Math.max(val1, val2);
                 stats.currentIncome = Math.min(val1, val2);
+                updated = true;
             } else if (moneyMatches.length === 1) {
-                stats.currentIncome = parseFloat(moneyMatches[0][1]);
+                // If it only finds one number, determine if it's the total or current income
+                let val = parseFloat(moneyMatches[0][1]);
+                if (val > stats.totalRent) {
+                    stats.totalRent = val;
+                } else {
+                    stats.currentIncome = val;
+                }
+                updated = true;
             }
 
-            const commonMatch = text.match(/(\d+)[\s\n]*COMMON/);
-            const rareMatch = text.match(/(\d+)[\s\n]*RARE/);
-            const epicMatch = text.match(/(\d+)[\s\n]*EPIC/);
-            const legMatch = text.match(/(\d+)[\s\n]*LEGENDARY/);
-            const boostMatch = text.match(/BADGES:\s*(\d+)%/);
+            // Parcels: Handle both "52 COMMON" and "COMMON 52" layouts
+            const commonMatch = text.match(/(\d+)[\s\n]*COMMON|COMMON[\s\n]*(\d+)/);
+            const rareMatch = text.match(/(\d+)[\s\n]*RARE|RARE[\s\n]*(\d+)/);
+            const epicMatch = text.match(/(\d+)[\s\n]*EPIC|EPIC[\s\n]*(\d+)/);
+            const legMatch = text.match(/(\d+)[\s\n]*LEGENDARY|LEGENDARY[\s\n]*(\d+)/);
+            const boostMatch = text.match(/BADGES:?\s*(\d+)%|(\d+)%[\s\n]*BOOST/);
 
-            if(commonMatch) stats.common = parseInt(commonMatch[1]);
-            if(rareMatch) stats.rare = parseInt(rareMatch[1]);
-            if(epicMatch) stats.epic = parseInt(epicMatch[1]);
-            if(legMatch) stats.legendary = parseInt(legMatch[1]);
-            if(boostMatch) stats.boost = parseInt(boostMatch[1]);
+            if(commonMatch) { stats.common = parseInt(commonMatch[1] || commonMatch[2]); updated = true; }
+            if(rareMatch) { stats.rare = parseInt(rareMatch[1] || rareMatch[2]); updated = true; }
+            if(epicMatch) { stats.epic = parseInt(epicMatch[1] || epicMatch[2]); updated = true; }
+            if(legMatch) { stats.legendary = parseInt(legMatch[1] || legMatch[2]); updated = true; }
+            if(boostMatch) { stats.boost = parseInt(boostMatch[1] || boostMatch[2]); updated = true; }
 
-            updateNumbers();
-            updateIncome();
-            updateBars();
-            save();
-            showToast();
+            const bar = document.getElementById("progressBar");
+            
+            if (updated) {
+                updateNumbers();
+                updateIncome();
+                updateBars();
+                save();
+                showToast("✅ Stats updated successfully!");
+                bar.style.width = "100%";
+                bar.innerHTML = "Scan Complete!";
+                bar.style.background = "linear-gradient(90deg, #00ff88, #00c853)";
+            } else {
+                showToast("⚠️ Could not read numbers. Try another image.");
+                bar.style.width = "100%";
+                bar.innerHTML = "Scan Failed. Text unclear.";
+                bar.style.background = "#ff4444";
+            }
         }
 
-        function showToast() {
+        function showToast(msg) {
             let toast = document.createElement("div");
             toast.className = "toast";
-            toast.innerHTML = "✅ Atlas Earth stats updated";
+            toast.innerHTML = msg;
             document.body.appendChild(toast);
             setTimeout(() => toast.remove(), 3000);
         }
