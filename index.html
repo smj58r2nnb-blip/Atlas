@@ -11,519 +11,113 @@
     
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        body {
-            font-family: 'Poppins', sans-serif;
-            background: linear-gradient(135deg, #071b2d, #0f3d5d, #1f7a3d);
-            color: #fff;
-            min-height: 100vh;
-        }
+        body { font-family: 'Poppins', sans-serif; background: linear-gradient(135deg, #071b2d, #0f3d5d, #1f7a3d); color: #fff; min-height: 100vh; }
         header { text-align: center; padding: 40px 20px; }
         header h1 { font-size: 3rem; margin-bottom: 10px; }
-        header p { opacity: .8; }
-        .container {
-            width: 95%; max-width: 1300px; margin: auto;
-            display: grid; gap: 25px; padding-bottom: 50px;
-        }
-        .profile {
-            display: flex; align-items: center; gap: 25px;
-            background: rgba(255, 255, 255, .08); backdrop-filter: blur(18px);
-            border-radius: 20px; padding: 25px; box-shadow: 0 15px 40px rgba(0, 0, 0, .4);
-        }
-        .profile img {
-            width: 120px; height: 120px; border-radius: 50%;
-            border: 4px solid #00ff88; object-fit: cover;
-        }
-        .cards {
-            display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 25px;
-        }
-        .card {
-            background: rgba(255, 255, 255, .08); backdrop-filter: blur(18px);
-            border-radius: 20px; padding: 25px; box-shadow: 0 12px 35px rgba(0, 0, 0, .35);
-            transition: .3s; animation: fadeIn .8s ease;
-        }
-        .card:hover { transform: translateY(-6px); box-shadow: 0 20px 45px rgba(0, 0, 0, .5); }
+        .container { width: 95%; max-width: 1300px; margin: auto; display: grid; gap: 25px; padding-bottom: 50px; }
+        .profile { display: flex; align-items: center; gap: 25px; background: rgba(255, 255, 255, .08); backdrop-filter: blur(18px); border-radius: 20px; padding: 25px; box-shadow: 0 15px 40px rgba(0, 0, 0, .4); }
+        .profile img { width: 120px; height: 120px; border-radius: 50%; border: 4px solid #00ff88; object-fit: cover; }
+        .cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 25px; }
+        .card { background: rgba(255, 255, 255, .08); backdrop-filter: blur(18px); border-radius: 20px; padding: 25px; box-shadow: 0 12px 35px rgba(0, 0, 0, .35); }
         .card h1 { color: #00ff88; margin-top: 10px; font-size: 2rem; }
         .card h2 { margin-bottom: 20px; }
         .card h3 { opacity: .9; }
         table { width: 100%; border-collapse: collapse; }
         td { padding: 12px; border-bottom: 1px solid rgba(255, 255, 255, .12); }
-        input[type=file] {
-            width: 100%; padding: 15px; border-radius: 12px; border: none;
-            background: #ffffff15; color: #fff; cursor: pointer;
-            margin-bottom: 10px;
-        }
-        input[type=file]::file-selector-button {
-            background: #00cc66; color: white; border: none;
-            padding: 10px 16px; border-radius: 8px; cursor: pointer; margin-right: 15px;
-        }
-        .bar {
-            width: 100%; height: 22px; background: #233646;
-            border-radius: 20px; overflow: hidden; margin: 10px 0 18px;
-        }
-        .common, .rare, .epic, .legendary { height: 100%; transition: width 1s ease; }
-        .common { background: #7f8c8d; width: 50%; }
-        .rare { background: #3498db; width: 32%; }
-        .epic { background: #9b59b6; width: 14%; }
-        .legendary { background: #f1c40f; width: 4%; }
-        
-        #dropArea {
-            margin-top: 15px; border: 3px dashed #00ff88; border-radius: 20px;
-            padding: 35px; text-align: center; transition: .3s; background: rgba(255, 255, 255, .04);
-            cursor: pointer;
-        }
-        #dropArea.drag { background: rgba(0, 255, 136, .18); border-color: #00ffaa; transform: scale(1.02); }
-        #dropArea h2 { margin-bottom: 10px; font-size: 1.5rem; }
-        #dropArea p { opacity: .8; }
-        #preview {
-            display: block; max-width: 100%; margin: 25px auto 0;
-            border-radius: 15px; box-shadow: 0 15px 35px rgba(0, 0, 0, .5);
-        }
-        #progressContainer {
-            width: 100%; height: 24px; margin-top: 20px;
-            border-radius: 20px; overflow: hidden; background: #2a3947;
-        }
-        #progressBar {
-            width: 0%; height: 100%; background: linear-gradient(90deg, #00ff88, #00c853);
-            color: white; font-weight: bold; display: flex;
-            justify-content: center; align-items: center; transition: width .2s;
-            font-size: 0.85rem; white-space: nowrap;
-        }
-        .toast {
-            position: fixed; bottom: 30px; right: 30px; background: #00cc66;
-            color: white; padding: 18px 24px; border-radius: 12px;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, .4); animation: fadeIn .5s; z-index: 9999;
-        }
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(20px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-        @media(max-width: 768px) {
-            .profile { flex-direction: column; text-align: center; }
-            header h1 { font-size: 2rem; }
-            .card h1 { font-size: 1.5rem; }
-            .container { width: 94%; }
-        }
+        input[type=file] { width: 100%; padding: 15px; border-radius: 12px; border: none; background: #ffffff15; color: #fff; cursor: pointer; margin-bottom: 10px; }
+        #dropArea { margin-top: 15px; border: 3px dashed #00ff88; border-radius: 20px; padding: 35px; text-align: center; background: rgba(255, 255, 255, .04); cursor: pointer; }
+        #preview { display: block; max-width: 100%; margin: 25px auto 0; border-radius: 15px; box-shadow: 0 15px 35px rgba(0, 0, 0, .5); }
+        #progressBar { width: 0%; height: 24px; background: linear-gradient(90deg, #00ff88, #00c853); color: white; font-weight: bold; display: flex; justify-content: center; align-items: center; transition: width .2s; font-size: 0.85rem; border-radius: 20px; }
+        .toast { position: fixed; bottom: 30px; right: 30px; background: #00cc66; color: white; padding: 18px 24px; border-radius: 12px; box-shadow: 0 10px 30px rgba(0, 0, 0, .4); z-index: 9999; }
     </style>
 </head>
 <body>
 
-    <header>
-        <div class="logo">
-            <h1>🌍 Atlas Earth Dashboard</h1>
-            <p>GitHub Companion</p>
-        </div>
-    </header>
+    <header><h1>🌍 Atlas Earth Dashboard</h1></header>
 
     <div class="container">
         <div class="profile">
             <img id="avatar" src="https://placehold.co/150x150/1e293b/ffffff?text=AE" alt="Avatar">
-            <div>
-                <h2>MOODYB</h2>
-                <p>👑 Mayor of Stenson Fields</p>
-            </div>
+            <div><h2>MOODYB</h2><p>👑 Mayor of Stenson Fields</p></div>
         </div>
 
         <div class="cards">
-            <div class="card">
-                <h3>📈 Daily Earnings</h3>
-                <h1 id="dailyEarnings">$0.00</h1>
-            </div>
-            <div class="card">
-                <h3>🎯 Next $10</h3>
-                <h1 id="nextTen">Calculating...</h1>
-            </div>
-            <div class="card">
-                <h3>⚡ Rent / Second</h3>
-                <h1 id="rentSecond">$0.00000000</h1>
-            </div>
-        </div>
-
-        <div class="cards">
-            <div class="card">
-                <h3>Current Income</h3>
-                <h1 id="income">$6.15229263</h1>
-            </div>
-            <div class="card">
-                <h3>Total Rent Earned</h3>
-                <h1 id="rent">$15.15226684</h1>
-            </div>
+            <div class="card"><h3>📈 Daily Earnings</h3><h1 id="dailyEarnings">$0.00</h1></div>
+            <div class="card"><h3>Current Income</h3><h1 id="income">$6.15229263</h1></div>
+            <div class="card"><h3>Total Rent Earned</h3><h1 id="rent">$15.15226684</h1></div>
         </div>
 
         <div class="card">
             <h2>📸 Upload Screenshot</h2>
-            <p style="margin-bottom: 10px; font-size: 0.9rem; opacity: 0.8;">Upload your Player Info screenshot to instantly update your layout stats.</p>
             <input type="file" id="upload" accept="image/*">
             <div id="dropArea">
                 <h2>📸 Drop Screenshot Here</h2>
-                <p>or click above to browse</p>
-                <div id="progressContainer"><div id="progressBar"></div></div>
+                <div id="progressBar">Ready</div>
                 <img id="preview" style="display:none;">
             </div>
         </div>
 
         <div class="cards">
-            <div class="card">
-                <h2>Parcel Statistics</h2>
-                <table>
-                    <tr><td>Total Parcels</td><td id="total">104</td></tr>
-                    <tr><td>Common</td><td id="common">52</td></tr>
-                    <tr><td>Rare</td><td id="rare">33</td></tr>
-                    <tr><td>Epic</td><td id="epic">15</td></tr>
-                    <tr><td>Legendary</td><td id="legendary">4</td></tr>
-                    <tr><td>Badge Boost</td><td id="boostDisplay">10%</td></tr>
-                </table>
-            </div>
-
-            <div class="card">
-                <h2>Estimated Income</h2>
-                <table>
-                    <tr><td>Per Hour</td><td id="hour">$0.00</td></tr>
-                    <tr><td>Per Day</td><td id="day">$0.00</td></tr>
-                    <tr><td>Per Month</td><td id="month">$0.00</td></tr>
-                    <tr><td>Per Year</td><td id="year">$0.00</td></tr>
-                </table>
-            </div>
-            
-            <div class="card">
-                <h2>⚖️ Strategy ROI</h2>
-                <table>
-                    <tr><td>1 Avg Parcel</td><td id="valParcel">$0.00 /yr</td></tr>
-                    <tr><td>+5% Tier Jump</td><td id="valBadge">$0.00 /yr</td></tr>
-                </table>
-                <p id="roiRecommendation" style="margin-top:20px; font-size:0.95rem; color:#00ff88; text-align:center; font-weight:600; line-height:1.5;">
-                    Analyzing layout...
-                </p>
-            </div>
-        </div>
-
-        <div class="cards">
-            <div class="card">
-                <h2>📈 Earnings History</h2>
-                <canvas id="earningsChart"></canvas>
-            </div>
-
-            <div class="card">
-                <h2>🏆 Milestones</h2>
-                <table>
-                    <tr><td>$10</td><td id="goal10"></td></tr>
-                    <tr><td>$25</td><td id="goal25"></td></tr>
-                    <tr><td>$50</td><td id="goal50"></td></tr>
-                    <tr><td>$100</td><td id="goal100"></td></tr>
-                    <tr><td>$500</td><td id="goal500"></td></tr>
-                    <tr><td>$1000</td><td id="goal1000"></td></tr>
-                </table>
-            </div>
-        </div>
-
-        <div class="card">
-            <h2>Parcel Breakdown</h2>
-            <p>Common</p>
-            <div class="bar"><div class="common" id="commonBar"></div></div>
-            <p>Rare</p>
-            <div class="bar"><div class="rare" id="rareBar"></div></div>
-            <p>Epic</p>
-            <div class="bar"><div class="epic" id="epicBar"></div></div>
-            <p>Legendary</p>
-            <div class="bar"><div class="legendary" id="legendaryBar"></div></div>
+            <div class="card"><h2>Parcel Statistics</h2><table><tr><td>Total</td><td id="total">104</td></tr><tr><td>Common</td><td id="common">52</td></tr><tr><td>Rare</td><td id="rare">33</td></tr><tr><td>Epic</td><td id="epic">15</td></tr><tr><td>Legendary</td><td id="legendary">4</td></tr></table></div>
+            <div class="card"><h2>Estimated Income</h2><table><tr><td>Per Hour</td><td id="hour">$0.00</td></tr><tr><td>Per Day</td><td id="day">$0.00</td></tr><tr><td>Per Year</td><td id="year">$0.00</td></tr></table></div>
         </div>
     </div>
 
     <script>
-        // =======================================
-        // State Management & Logic
-        // =======================================
-        const stats = {
-            currentIncome: 6.15229263,
-            totalRent: 15.15226684,
-            common: 52,
-            rare: 33,
-            epic: 15,
-            legendary: 4,
-            boost: 10
-        };
-
-        const rates = {
-            common: 0.0000000011,
-            rare: 0.0000000016,
-            epic: 0.0000000022,
-            legendary: 0.0000000044
-        };
-
-        function totalParcels() {
-            return stats.common + stats.rare + stats.epic + stats.legendary;
-        }
-
-        function rentPerSecond() {
-            let base = (stats.common * rates.common) + 
-                       (stats.rare * rates.rare) + 
-                       (stats.epic * rates.epic) + 
-                       (stats.legendary * rates.legendary);
-            return base * (1 + (stats.boost / 100));
-        }
-
-        function money(value) {
-            return "$" + value.toFixed(8);
-        }
-
-        function updateIncome() {
-            let second = rentPerSecond();
-            document.getElementById("hour").innerHTML = money(second * 3600);
-            document.getElementById("day").innerHTML = money(second * 86400);
-            document.getElementById("month").innerHTML = money(second * 86400 * 30);
-            document.getElementById("year").innerHTML = money(second * 86400 * 365);
-        }
-
-        function updateBars() {
-            let total = totalParcels();
-            if(total === 0) return;
-            document.getElementById("commonBar").style.width = (stats.common / total * 100) + "%";
-            document.getElementById("rareBar").style.width = (stats.rare / total * 100) + "%";
-            document.getElementById("epicBar").style.width = (stats.epic / total * 100) + "%";
-            document.getElementById("legendaryBar").style.width = (stats.legendary / total * 100) + "%";
-        }
-
-        function updateStrategy() {
-            const avgParcelBase = 0.00000000158; 
-            let currentBaseRent = (stats.common * rates.common) + (stats.rare * rates.rare) + (stats.epic * rates.epic) + (stats.legendary * rates.legendary);
-            let parcelGainYear = (avgParcelBase * (1 + (stats.boost / 100))) * 86400 * 365;
-            let badgeGainYear = (currentBaseRent * 0.05) * 86400 * 365;
-
-            document.getElementById("valParcel").innerHTML = "+ " + money(parcelGainYear) + " /yr";
-            document.getElementById("valBadge").innerHTML = "+ " + money(badgeGainYear) + " /yr";
-
-            let elRec = document.getElementById("roiRecommendation");
-            let total = totalParcels();
-            let parcelsNeeded = badgeGainYear / parcelGainYear;
-
-            let recHTML = `A 5% badge jump gives the same rent as buying <b>${parcelsNeeded.toFixed(1)} average parcels.</b><br><br>`;
-            if (total >= 150 && total < 220) {
-                recHTML += "<span style='color:#ffc107'>⚠️ You are at the 150 parcel tier drop! Save AB to jump straight to 220.</span>";
-            } else if (parcelsNeeded > 20) {
-                recHTML += "<span style='color:#00ff88'>⭐ Buy Badges! A tier jump is mathematically better than buying land right now.</span>";
-            } else {
-                recHTML += "<span style='color:#2196F3'>📍 Buy Land! Parcels provide higher ROI for your Atlas Bucks right now.</span>";
-            }
-            elRec.innerHTML = recHTML;
-        }
+        const stats = { currentIncome: 6.15229263, totalRent: 15.15226684, common: 52, rare: 33, epic: 15, legendary: 4, boost: 10 };
+        const rates = { common: 0.0000000011, rare: 0.0000000016, epic: 0.0000000022, legendary: 0.0000000044 };
 
         function updateNumbers() {
-            document.getElementById("income").innerHTML = money(stats.currentIncome);
-            document.getElementById("rent").innerHTML = money(stats.totalRent);
-            document.getElementById("total").innerHTML = totalParcels();
+            document.getElementById("income").innerHTML = "$" + stats.currentIncome.toFixed(8);
+            document.getElementById("rent").innerHTML = "$" + stats.totalRent.toFixed(8);
+            document.getElementById("total").innerHTML = stats.common + stats.rare + stats.epic + stats.legendary;
             document.getElementById("common").innerHTML = stats.common;
             document.getElementById("rare").innerHTML = stats.rare;
             document.getElementById("epic").innerHTML = stats.epic;
             document.getElementById("legendary").innerHTML = stats.legendary;
-            document.getElementById("boostDisplay").innerHTML = stats.boost + "%";
-            updateStrategy();
         }
-
-        function save() {
-            localStorage.setItem("atlasDashboard", JSON.stringify(stats));
-        }
-
-        function load() {
-            let saved = localStorage.getItem("atlasDashboard");
-            if(saved) Object.assign(stats, JSON.parse(saved));
-        }
-
-        function formatTime(seconds) {
-            if(seconds <= 0) return "Complete";
-            let days = Math.floor(seconds / 86400);
-            let hours = Math.floor((seconds % 86400) / 3600);
-            let mins = Math.floor((seconds % 3600) / 60);
-            return `${days}d ${hours}h ${mins}m`;
-        }
-
-        function updateDashboard() {
-            const second = rentPerSecond();
-            document.getElementById("rentSecond").innerHTML = money(second);
-            document.getElementById("dailyEarnings").innerHTML = money(second * 86400);
-            
-            const goals = [10, 25, 50, 100, 500, 1000];
-            goals.forEach(goal => {
-                const el = document.getElementById("goal" + goal);
-                if(!el) return;
-                const remaining = goal - stats.currentIncome;
-                el.innerHTML = remaining <= 0 ? "✅ Reached" : formatTime(remaining / second);
-            });
-
-            const next = document.getElementById("nextTen");
-            if(next) {
-                const remain = 10 - stats.currentIncome;
-                next.innerHTML = remain <= 0 ? "Reached" : formatTime(remain / second);
-            }
-        }
-
-        function liveCounter() {
-            stats.currentIncome += rentPerSecond();
-            stats.totalRent += rentPerSecond();
-            updateNumbers();
-            updateDashboard();
-            save();
-        }
-
-        // =======================================
-        // OCR Engine (Upgraded)
-        // =======================================
-        const uploadInput = document.getElementById("upload");
-        const dropArea = document.getElementById("dropArea");
-
-        function updateProgress(percent) {
-            const bar = document.getElementById("progressBar");
-            if(bar) {
-                bar.style.width = percent + "%";
-                bar.innerHTML = Math.floor(percent) + "%";
-            }
-        }
-
-        dropArea.addEventListener("dragover", (e) => { e.preventDefault(); dropArea.classList.add("drag"); });
-        dropArea.addEventListener("dragleave", () => dropArea.classList.remove("drag"));
-        dropArea.addEventListener("drop", (e) => {
-            e.preventDefault();
-            dropArea.classList.remove("drag");
-            processImage(e.dataTransfer.files[0]);
-        });
-        uploadInput.addEventListener("change", (e) => processImage(e.target.files[0]));
 
         async function processImage(file) {
             if(!file) return;
-            const preview = document.getElementById("preview");
-            preview.src = URL.createObjectURL(file);
-            preview.style.display = "block";
-            
-            document.getElementById("progressBar").style.width = "10%";
-            document.getElementById("progressBar").innerHTML = "Scanning...";
-
+            const bar = document.getElementById("progressBar");
+            bar.style.width = "20%"; bar.innerHTML = "Scanning...";
             try {
-                const result = await Tesseract.recognize(file, "eng", {
-                    logger: m => { if(m.status === "recognizing text") updateProgress(m.progress * 100); }
-                });
-                parseAtlas(result.data.text.toUpperCase());
-            } catch (err) {
-                console.error("OCR Error", err);
-                document.getElementById("progressBar").style.width = "100%";
-                document.getElementById("progressBar").innerHTML = "Error: Image format or size.";
-                document.getElementById("progressBar").style.background = "#ff4444";
-            }
+                const result = await Tesseract.recognize(file, "eng");
+                parseAtlas(result.data.text);
+            } catch (err) { bar.innerHTML = "Scan Error"; bar.style.background = "#ff4444"; }
         }
 
         function parseAtlas(text) {
-            let updated = false;
+            const cleanText = text.toUpperCase().replace(/[\s,]+/g, '');
+            let moneyUpdated = false, parcelsUpdated = false;
 
-            // Money: Look for a decimal with at least 5 numbers after it, ignoring the $ sign
-            const moneyMatches = [...text.matchAll(/(?:[$S5s])?\s*(\d+\.\d{5,})/g)];
-            
+            const moneyMatches = [...cleanText.matchAll(/(\d+\.\d{5,})/g)];
             if (moneyMatches.length >= 2) {
-                let val1 = parseFloat(moneyMatches[0][1]);
-                let val2 = parseFloat(moneyMatches[1][1]);
-                stats.totalRent = Math.max(val1, val2);
-                stats.currentIncome = Math.min(val1, val2);
-                updated = true;
-            } else if (moneyMatches.length === 1) {
-                // If it only finds one number, determine if it's the total or current income
-                let val = parseFloat(moneyMatches[0][1]);
-                if (val > stats.totalRent) {
-                    stats.totalRent = val;
-                } else {
-                    stats.currentIncome = val;
-                }
-                updated = true;
+                stats.totalRent = Math.max(parseFloat(moneyMatches[0][1]), parseFloat(moneyMatches[1][1]));
+                stats.currentIncome = Math.min(parseFloat(moneyMatches[0][1]), parseFloat(moneyMatches[1][1]));
+                moneyUpdated = true;
             }
 
-            // Parcels: Handle both "52 COMMON" and "COMMON 52" layouts
-            const commonMatch = text.match(/(\d+)[\s\n]*COMMON|COMMON[\s\n]*(\d+)/);
-            const rareMatch = text.match(/(\d+)[\s\n]*RARE|RARE[\s\n]*(\d+)/);
-            const epicMatch = text.match(/(\d+)[\s\n]*EPIC|EPIC[\s\n]*(\d+)/);
-            const legMatch = text.match(/(\d+)[\s\n]*LEGENDARY|LEGENDARY[\s\n]*(\d+)/);
-            const boostMatch = text.match(/BADGES:?\s*(\d+)%|(\d+)%[\s\n]*BOOST/);
-
-            if(commonMatch) { stats.common = parseInt(commonMatch[1] || commonMatch[2]); updated = true; }
-            if(rareMatch) { stats.rare = parseInt(rareMatch[1] || rareMatch[2]); updated = true; }
-            if(epicMatch) { stats.epic = parseInt(epicMatch[1] || epicMatch[2]); updated = true; }
-            if(legMatch) { stats.legendary = parseInt(legMatch[1] || legMatch[2]); updated = true; }
-            if(boostMatch) { stats.boost = parseInt(boostMatch[1] || boostMatch[2]); updated = true; }
+            const c = cleanText.match(/(\d+)COMMON|COMMON(\d+)/);
+            const r = cleanText.match(/(\d+)RARE|RARE(\d+)/);
+            const e = cleanText.match(/(\d+)EPIC|EPIC(\d+)/);
+            const l = cleanText.match(/(\d+)LEGENDARY|LEGENDARY(\d+)/);
+            
+            if(c) { stats.common = parseInt(c[1] || c[2]); parcelsUpdated = true; }
+            if(r) { stats.rare = parseInt(r[1] || r[2]); parcelsUpdated = true; }
+            if(e) { stats.epic = parseInt(e[1] || e[2]); parcelsUpdated = true; }
+            if(l) { stats.legendary = parseInt(l[1] || l[2]); parcelsUpdated = true; }
 
             const bar = document.getElementById("progressBar");
-            
-            if (updated) {
+            if (moneyUpdated || parcelsUpdated) {
                 updateNumbers();
-                updateIncome();
-                updateBars();
-                save();
-                showToast("✅ Stats updated successfully!");
-                bar.style.width = "100%";
-                bar.innerHTML = "Scan Complete!";
-                bar.style.background = "linear-gradient(90deg, #00ff88, #00c853)";
-            } else {
-                showToast("⚠️ Could not read numbers. Try another image.");
-                bar.style.width = "100%";
-                bar.innerHTML = "Scan Failed. Text unclear.";
-                bar.style.background = "#ff4444";
-            }
+                bar.style.width = "100%"; bar.innerHTML = "Updated!";
+            } else { bar.innerHTML = "Could not read data"; bar.style.background = "#ffc107"; }
         }
 
-        function showToast(msg) {
-            let toast = document.createElement("div");
-            toast.className = "toast";
-            toast.innerHTML = msg;
-            document.body.appendChild(toast);
-            setTimeout(() => toast.remove(), 3000);
-        }
-
-        // =======================================
-        // Chart.js Setup
-        // =======================================
-        let earningsHistory = JSON.parse(localStorage.getItem("earningsHistory")) || [];
-
-        function saveHistory() {
-            earningsHistory.push({
-                date: new Date().toLocaleTimeString(),
-                income: stats.currentIncome
-            });
-            if(earningsHistory.length > 20) earningsHistory.shift();
-            localStorage.setItem("earningsHistory", JSON.stringify(earningsHistory));
-        }
-
-        const ctx = document.getElementById("earningsChart");
-        const chart = new Chart(ctx, {
-            type: "line",
-            data: {
-                labels: earningsHistory.map(x => x.date),
-                datasets: [{
-                    label: "Live Income",
-                    data: earningsHistory.map(x => x.income),
-                    tension: .35,
-                    fill: true,
-                    borderColor: '#00ff88',
-                    backgroundColor: 'rgba(0, 255, 136, 0.1)',
-                    borderWidth: 3
-                }]
-            },
-            options: {
-                responsive: true,
-                plugins: { legend: { labels: { color: "white" } } },
-                scales: {
-                    x: { ticks: { color: "white" } },
-                    y: { ticks: { color: "white" } }
-                }
-            }
-        });
-
-        setInterval(() => {
-            saveHistory();
-            chart.data.labels = earningsHistory.map(x => x.date);
-            chart.data.datasets[0].data = earningsHistory.map(x => x.income);
-            chart.update();
-        }, 10000);
-
-        // Initialize App
+        document.getElementById("upload").addEventListener("change", (e) => processImage(e.target.files[0]));
+        load = () => { let s = localStorage.getItem("atlasDashboard"); if(s) Object.assign(stats, JSON.parse(s)); updateNumbers(); };
         load();
-        updateNumbers();
-        updateIncome();
-        updateBars();
-        updateDashboard();
-        setInterval(liveCounter, 1000);
     </script>
 </body>
 </html>
