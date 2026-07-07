@@ -25,6 +25,7 @@
         .card h3 { opacity: .9; }
         table { width: 100%; border-collapse: collapse; }
         td { padding: 12px; border-bottom: 1px solid rgba(255, 255, 255, .12); }
+        th { text-align: left; padding: 10px 12px; border-bottom: 2px solid rgba(255,255,255,0.2); color: #00ff88; }
         
         .input-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 15px; }
         .input-group { display: flex; flex-direction: column; }
@@ -59,6 +60,7 @@
     </header>
 
     <div class="container">
+        <!-- Profile -->
         <div class="profile">
             <img id="avatar" src="https://placehold.co/150x150/1e293b/ffffff?text=AE" alt="Avatar">
             <div>
@@ -78,22 +80,45 @@
             <div class="card"><h3>Total Rent Earned</h3><h1 id="rent">$15.15226684</h1></div>
         </div>
 
+        <!-- CONTROL PANEL -->
         <div class="card">
             <h2>⚙️ Manual Update Panel</h2>
             <p style="font-size: 0.9rem; opacity: 0.8;">Enter your latest stats to instantly recalibrate.</p>
             <div class="input-grid">
                 <div class="input-group"><label>Current Income ($)</label><input type="number" id="inpIncome" step="0.00000001"></div>
                 <div class="input-group"><label>Total Rent Accrued ($)</label><input type="number" id="inpRent" step="0.00000001"></div>
+                <div class="input-group"><label>Current Atlas Bucks (AB)</label><input type="number" id="inpAB"></div>
+                <div class="input-group"><label>Badge Boost (%)</label><input type="number" id="inpBoost"></div>
                 <div class="input-group"><label>Common Parcels</label><input type="number" id="inpCommon"></div>
                 <div class="input-group"><label>Rare Parcels</label><input type="number" id="inpRare"></div>
                 <div class="input-group"><label>Epic Parcels</label><input type="number" id="inpEpic"></div>
                 <div class="input-group"><label>Legendary Parcels</label><input type="number" id="inpLegendary"></div>
-                <div class="input-group full-width"><label>Badge Boost (%)</label><input type="number" id="inpBoost"></div>
                 <button class="btn-update" onclick="saveManualData()">Sync Dashboard Data</button>
             </div>
         </div>
 
         <div class="cards">
+            <!-- DAILY AB TRACKER -->
+            <div class="card">
+                <h2>💎 Atlas Buck Bank</h2>
+                <p style="margin-bottom: 10px; font-size: 0.9rem; opacity: 0.8;">Your daily AB accumulation.</p>
+                <h1 id="abDisplay" style="color: #2196F3; font-size: 2.8rem; margin-bottom: 20px;">0 AB</h1>
+                
+                <table style="width: 100%; font-size: 0.9rem;">
+                    <thead>
+                        <tr>
+                            <th>Date</th>
+                            <th>Total Bank</th>
+                            <th>Daily Growth</th>
+                        </tr>
+                    </thead>
+                    <tbody id="abHistoryList">
+                        <!-- JS populated -->
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- PARCEL STATS -->
             <div class="card">
                 <h2>Parcel Statistics</h2>
                 <table>
@@ -105,7 +130,9 @@
                     <tr><td>Badge Boost</td><td id="boostDisplay">10%</td></tr>
                 </table>
             </div>
+        </div>
 
+        <div class="cards">
             <div class="card">
                 <h2>Estimated Income (Base)</h2>
                 <table>
@@ -136,10 +163,9 @@
                 <h2>🚀 The Path to $50/mo</h2>
                 <p style="margin-bottom: 15px; font-size: 0.9rem; opacity: 0.8;">Your UK strategic roadmap to hitting 1,500 parcels.</p>
                 
-                <!-- NEW AB Growth Inputs -->
                 <div class="input-grid" style="margin-bottom: 20px; background: rgba(0,0,0,0.2); padding: 15px; border-radius: 10px;">
                     <div class="input-group">
-                        <label>Daily Free AB (Ads/Spins)</label>
+                        <label>Est. Daily Free AB (Ads/Spins)</label>
                         <input type="number" id="inpDailyAB" value="40" onchange="saveManualData()">
                     </div>
                     <div class="input-group" style="flex-direction: row; align-items: center; gap: 10px; margin-top: 20px;">
@@ -155,7 +181,6 @@
                 
                 <div class="bar" style="height: 12px; margin: 10px 0;"><div id="bar50" style="height: 100%; width: 0%; background: #00ff88; transition: width 1s;"></div></div>
                 
-                <!-- NEW UK Tier Warning Engine -->
                 <div style="background: rgba(255, 193, 7, 0.1); border-left: 4px solid #ffc107; padding: 15px; border-radius: 4px; margin-top: 15px;">
                     <strong style="color: #ffc107; font-size: 1.1rem;">⚠️ UK Tier Console:</strong>
                     <p id="tierWarning" style="font-size: 0.85rem; margin-top: 5px; line-height: 1.4;">Analyzing tier...</p>
@@ -176,6 +201,7 @@
         const stats = { 
             currentIncome: 6.19662508, 
             totalRent: 15.19691416, 
+            currentAB: 0,
             common: 52, 
             rare: 33, 
             epic: 15, 
@@ -193,6 +219,7 @@
         function populateInputs() {
             if(document.getElementById("inpIncome")) document.getElementById("inpIncome").value = stats.currentIncome.toFixed(8);
             if(document.getElementById("inpRent")) document.getElementById("inpRent").value = stats.totalRent.toFixed(8);
+            if(document.getElementById("inpAB")) document.getElementById("inpAB").value = stats.currentAB;
             if(document.getElementById("inpCommon")) document.getElementById("inpCommon").value = stats.common;
             if(document.getElementById("inpRare")) document.getElementById("inpRare").value = stats.rare;
             if(document.getElementById("inpEpic")) document.getElementById("inpEpic").value = stats.epic;
@@ -202,9 +229,56 @@
             if(document.getElementById("inpExplorer")) document.getElementById("inpExplorer").checked = stats.hasExplorerClub;
         }
 
+        // --- NEW: AB Daily Log Engine ---
+        let abHistory = JSON.parse(localStorage.getItem("abDailyHistory")) || {};
+        
+        function logDailyAB() {
+            let today = new Date().toLocaleDateString(undefined, {month: 'short', day: 'numeric'});
+            abHistory[today] = stats.currentAB;
+            localStorage.setItem("abDailyHistory", JSON.stringify(abHistory));
+            renderABHistory();
+        }
+
+        function renderABHistory() {
+            document.getElementById("abDisplay").innerHTML = (stats.currentAB || 0) + " AB";
+            
+            let el = document.getElementById("abHistoryList");
+            if(!el) return;
+            let html = "";
+            
+            // Get dates sorted newest first (Note: simplistic string sort works if formatting aligns, better to rely on insertion order for simple use case or parse dates. Using reverse array for now)
+            let dates = Object.keys(abHistory);
+            
+            if(dates.length === 0) {
+                el.innerHTML = "<tr><td colspan='3' style='text-align:center; opacity:0.5;'>Update your AB to start tracking!</td></tr>";
+                return;
+            }
+
+            // Reverse to show newest at top
+            dates.reverse();
+
+            for(let i=0; i < Math.min(dates.length, 6); i++) {
+                let date = dates[i];
+                let ab = abHistory[date];
+                let prevDate = dates[i+1];
+                let diff = prevDate ? (ab - abHistory[prevDate]) : 0;
+                
+                let diffStr = "-";
+                let color = "#ffffff";
+                if(prevDate) {
+                    diffStr = diff >= 0 ? `+${diff} AB` : `${diff} AB`;
+                    color = diff > 0 ? '#00ff88' : (diff < 0 ? '#ff4444' : '#ffffff');
+                }
+
+                html += `<tr><td style="padding: 8px 12px;">${date}</td><td style="padding: 8px 12px;">${ab} AB</td><td style="padding: 8px 12px; color:${color}; font-weight:bold;">${diffStr}</td></tr>`;
+            }
+            el.innerHTML = html;
+        }
+
         function saveManualData() {
             let newIncome = parseFloat(document.getElementById("inpIncome").value);
             let newRent = parseFloat(document.getElementById("inpRent").value);
+            let newAB = parseInt(document.getElementById("inpAB").value);
             let newCommon = parseInt(document.getElementById("inpCommon").value);
             let newRare = parseInt(document.getElementById("inpRare").value);
             let newEpic = parseInt(document.getElementById("inpEpic").value);
@@ -214,6 +288,7 @@
 
             if(!isNaN(newIncome)) stats.currentIncome = newIncome;
             if(!isNaN(newRent)) stats.totalRent = newRent;
+            if(!isNaN(newAB)) stats.currentAB = newAB;
             if(!isNaN(newCommon)) stats.common = newCommon;
             if(!isNaN(newRare)) stats.rare = newRare;
             if(!isNaN(newEpic)) stats.epic = newEpic;
@@ -223,6 +298,7 @@
             
             stats.hasExplorerClub = document.getElementById("inpExplorer").checked;
 
+            logDailyAB();
             updateNumbers(); updateIncome(); updateBars(); updateDashboard(); save();
             showToast("✅ Dashboard Successfully Calibrated!");
         }
@@ -279,8 +355,11 @@
             let abNeededForParcels = parcelsNeeded * 100;
             let abNeededForBadges = 16000; // Assuming ~80 more badges needed for max 25% boost
             let totalABNeeded = abNeededForParcels + abNeededForBadges;
+            
+            // Subtract Current Bank from Goal
+            let remainingABNeeded = Math.max(0, totalABNeeded - (stats.currentAB || 0));
 
-            let monthsRequired = monthlyAB > 0 ? (totalABNeeded / monthlyAB) : 999;
+            let monthsRequired = monthlyAB > 0 ? (remainingABNeeded / monthlyAB) : 999;
             let targetDate = new Date();
             targetDate.setMonth(targetDate.getMonth() + monthsRequired);
 
@@ -334,7 +413,12 @@
         }
 
         function save() { localStorage.setItem("atlasDashboard", JSON.stringify(stats)); }
-        function load() { let saved = localStorage.getItem("atlasDashboard"); if(saved) Object.assign(stats, JSON.parse(saved)); }
+        
+        function load() { 
+            let saved = localStorage.getItem("atlasDashboard"); 
+            if(saved) Object.assign(stats, JSON.parse(saved)); 
+            renderABHistory();
+        }
 
         function formatTime(seconds) {
             if(seconds <= 0) return "Complete";
