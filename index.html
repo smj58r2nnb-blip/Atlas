@@ -30,6 +30,7 @@
         .input-group { display: flex; flex-direction: column; }
         .input-group label { font-size: 0.85rem; opacity: 0.8; margin-bottom: 5px; }
         .input-group input { padding: 12px; border-radius: 8px; border: 1px solid rgba(0, 255, 136, 0.4); background: rgba(0, 0, 0, 0.3); color: white; font-family: 'Poppins', sans-serif; font-size: 1rem; outline: none; transition: 0.2s; }
+        .input-group input[type="checkbox"] { width: 22px; height: 22px; accent-color: #00ff88; cursor: pointer; }
         .input-group input:focus { border-color: #00ff88; background: rgba(0, 0, 0, 0.5); }
         .full-width { grid-column: span 2; }
         .btn-update { grid-column: span 2; padding: 15px; border-radius: 12px; background: #00cc66; color: white; font-weight: bold; font-size: 1.1rem; border: none; cursor: pointer; transition: 0.2s; margin-top: 10px; font-family: 'Poppins', sans-serif; }
@@ -133,16 +134,31 @@
 
             <div class="card">
                 <h2>🚀 The Path to $50/mo</h2>
-                <p style="margin-bottom: 15px; font-size: 0.9rem; opacity: 0.8;">Your strategic roadmap to hitting the big milestone.</p>
+                <p style="margin-bottom: 15px; font-size: 0.9rem; opacity: 0.8;">Your UK strategic roadmap to hitting 1,500 parcels.</p>
+                
+                <!-- NEW AB Growth Inputs -->
+                <div class="input-grid" style="margin-bottom: 20px; background: rgba(0,0,0,0.2); padding: 15px; border-radius: 10px;">
+                    <div class="input-group">
+                        <label>Daily Free AB (Ads/Spins)</label>
+                        <input type="number" id="inpDailyAB" value="40" onchange="saveManualData()">
+                    </div>
+                    <div class="input-group" style="flex-direction: row; align-items: center; gap: 10px; margin-top: 20px;">
+                        <input type="checkbox" id="inpExplorer" onchange="saveManualData()">
+                        <label style="margin: 0; font-size: 1rem; color: #00ff88;">Active Explorer Club</label>
+                    </div>
+                </div>
+
                 <table>
-                    <tr><td>Current Est. (No Ad Boost)</td><td id="currentMoPath">$0.00</td></tr>
-                    <tr><td>Target</td><td>$50.00</td></tr>
-                    <tr><td>Progress</td><td id="progress50">0%</td></tr>
+                    <tr><td>Projected Date</td><td id="projectedDate" style="color: #00ff88; font-weight: bold; font-size: 1.1rem;">Calculating...</td></tr>
+                    <tr><td>EC Subscriptions</td><td id="ecMonthsRequired">0 Months</td></tr>
                 </table>
+                
                 <div class="bar" style="height: 12px; margin: 10px 0;"><div id="bar50" style="height: 100%; width: 0%; background: #00ff88; transition: width 1s;"></div></div>
+                
+                <!-- NEW UK Tier Warning Engine -->
                 <div style="background: rgba(255, 193, 7, 0.1); border-left: 4px solid #ffc107; padding: 15px; border-radius: 4px; margin-top: 15px;">
-                    <strong style="color: #ffc107; font-size: 1.1rem;">⚠️ Tier Drop Warning:</strong>
-                    <p id="tierWarning" style="font-size: 0.85rem; margin-top: 5px;">You are currently safely within the 15x boost tier.</p>
+                    <strong style="color: #ffc107; font-size: 1.1rem;">⚠️ UK Tier Console:</strong>
+                    <p id="tierWarning" style="font-size: 0.85rem; margin-top: 5px; line-height: 1.4;">Analyzing tier...</p>
                 </div>
             </div>
         </div>
@@ -157,7 +173,17 @@
     </div>
 
     <script>
-        const stats = { currentIncome: 6.19662508, totalRent: 15.19691416, common: 52, rare: 33, epic: 15, legendary: 4, boost: 10 };
+        const stats = { 
+            currentIncome: 6.19662508, 
+            totalRent: 15.19691416, 
+            common: 52, 
+            rare: 33, 
+            epic: 15, 
+            legendary: 4, 
+            boost: 10,
+            dailyAB: 40,
+            hasExplorerClub: false
+        };
         const rates = { common: 0.0000000011, rare: 0.0000000016, epic: 0.0000000022, legendary: 0.0000000044 };
 
         function totalParcels() { return stats.common + stats.rare + stats.epic + stats.legendary; }
@@ -165,13 +191,15 @@
         function money(value) { return "$" + value.toFixed(8); }
 
         function populateInputs() {
-            document.getElementById("inpIncome").value = stats.currentIncome.toFixed(8);
-            document.getElementById("inpRent").value = stats.totalRent.toFixed(8);
-            document.getElementById("inpCommon").value = stats.common;
-            document.getElementById("inpRare").value = stats.rare;
-            document.getElementById("inpEpic").value = stats.epic;
-            document.getElementById("inpLegendary").value = stats.legendary;
-            document.getElementById("inpBoost").value = stats.boost;
+            if(document.getElementById("inpIncome")) document.getElementById("inpIncome").value = stats.currentIncome.toFixed(8);
+            if(document.getElementById("inpRent")) document.getElementById("inpRent").value = stats.totalRent.toFixed(8);
+            if(document.getElementById("inpCommon")) document.getElementById("inpCommon").value = stats.common;
+            if(document.getElementById("inpRare")) document.getElementById("inpRare").value = stats.rare;
+            if(document.getElementById("inpEpic")) document.getElementById("inpEpic").value = stats.epic;
+            if(document.getElementById("inpLegendary")) document.getElementById("inpLegendary").value = stats.legendary;
+            if(document.getElementById("inpBoost")) document.getElementById("inpBoost").value = stats.boost;
+            if(document.getElementById("inpDailyAB")) document.getElementById("inpDailyAB").value = stats.dailyAB;
+            if(document.getElementById("inpExplorer")) document.getElementById("inpExplorer").checked = stats.hasExplorerClub;
         }
 
         function saveManualData() {
@@ -182,6 +210,7 @@
             let newEpic = parseInt(document.getElementById("inpEpic").value);
             let newLegendary = parseInt(document.getElementById("inpLegendary").value);
             let newBoost = parseInt(document.getElementById("inpBoost").value);
+            let newDailyAB = parseInt(document.getElementById("inpDailyAB").value);
 
             if(!isNaN(newIncome)) stats.currentIncome = newIncome;
             if(!isNaN(newRent)) stats.totalRent = newRent;
@@ -190,8 +219,11 @@
             if(!isNaN(newEpic)) stats.epic = newEpic;
             if(!isNaN(newLegendary)) stats.legendary = newLegendary;
             if(!isNaN(newBoost)) stats.boost = newBoost;
+            if(!isNaN(newDailyAB)) stats.dailyAB = newDailyAB;
+            
+            stats.hasExplorerClub = document.getElementById("inpExplorer").checked;
 
-            updateNumbers(); updateIncome(); updateBars(); updateDashboard(); save(); populateInputs();
+            updateNumbers(); updateIncome(); updateBars(); updateDashboard(); save();
             showToast("✅ Dashboard Successfully Calibrated!");
         }
 
@@ -202,23 +234,6 @@
             document.getElementById("day").innerHTML = money(second * 86400);
             document.getElementById("month").innerHTML = money(monthly);
             document.getElementById("year").innerHTML = money(second * 86400 * 365);
-            
-            // Path to $50 Tracking
-            document.getElementById("currentMoPath").innerHTML = money(monthly);
-            let percent = (monthly / 50) * 100;
-            document.getElementById("progress50").innerHTML = percent.toFixed(2) + "%";
-            document.getElementById("bar50").style.width = Math.min(percent, 100) + "%";
-
-            // Tier Warning Engine
-            let total = totalParcels();
-            let warnEl = document.getElementById("tierWarning");
-            if (total < 150) {
-                warnEl.innerHTML = `You are at ${total} parcels. Your 15x multiplier drops to 10x at 151 parcels. Stop buying at 150 and save AB to jump the next tier!`;
-            } else if (total === 150) {
-                warnEl.innerHTML = `⚠️ DANGER ZONE: You are at exactly 150 parcels. Do not buy parcel #151 or your multiplier will drop. Save AB to jump directly to the end of the next tier.`;
-            } else {
-                warnEl.innerHTML = `You have crossed the threshold into a lower multiplier tier. Keep farming AB to climb to the next break-even point.`;
-            }
         }
 
         function updateBars() {
@@ -254,6 +269,57 @@
             elRec.innerHTML = recHTML;
         }
 
+        function updatePathTo50() {
+            let monthlyAB = (stats.dailyAB || 0) * 30;
+            // Add average monthly AB from Explorer Club (approx 10,953 AB over 90 days)
+            if (stats.hasExplorerClub) monthlyAB += 3651; 
+
+            let total = totalParcels();
+            let parcelsNeeded = Math.max(0, 1500 - total);
+            let abNeededForParcels = parcelsNeeded * 100;
+            let abNeededForBadges = 16000; // Assuming ~80 more badges needed for max 25% boost
+            let totalABNeeded = abNeededForParcels + abNeededForBadges;
+
+            let monthsRequired = monthlyAB > 0 ? (totalABNeeded / monthlyAB) : 999;
+            let targetDate = new Date();
+            targetDate.setMonth(targetDate.getMonth() + monthsRequired);
+
+            let elDate = document.getElementById("projectedDate");
+            let elEC = document.getElementById("ecMonthsRequired");
+            
+            if (elDate) {
+                elDate.innerHTML = monthlyAB > 0 ? targetDate.toLocaleDateString(undefined, {month: 'long', year: 'numeric'}) : "Never (Earn more AB)";
+            }
+            if (elEC) {
+                if (stats.hasExplorerClub) {
+                    let monthsCost = Math.ceil(monthsRequired);
+                    elEC.innerHTML = `${monthsCost} Months ($${(monthsCost * 49.99).toFixed(2)})`;
+                } else {
+                    elEC.innerHTML = "Not Active";
+                }
+            }
+
+            let percent = Math.min((total / 1500) * 100, 100);
+            let elBar = document.getElementById("bar50");
+            if (elBar) elBar.style.width = percent + "%";
+
+            // UK Tier Warning Engine
+            let warnEl = document.getElementById("tierWarning");
+            if (warnEl) {
+                if (total < 60) {
+                    warnEl.innerHTML = `You are in the 20x tier. Your multiplier drops to 15x at 61 parcels. Stop buying at 60 and save AB to jump to the next bracket!`;
+                } else if (total === 60) {
+                    warnEl.innerHTML = `⚠️ DANGER ZONE: You are at exactly 60 parcels. Do not buy parcel #61! Save AB to perform a tier jump.`;
+                } else if (total < 150) {
+                    warnEl.innerHTML = `You are in the 15x tier. Your multiplier drops to 10x at 151 parcels. Stop buying at 150 and save roughly 7,000 AB to jump past the 220 limit!`;
+                } else if (total === 150) {
+                    warnEl.innerHTML = `⚠️ DANGER ZONE: You are at exactly 150 parcels. Do not buy parcel #151 or your multiplier will drop to 10x. Save roughly 7,000 AB to jump past the 220 limit!`;
+                } else {
+                    warnEl.innerHTML = `You are past the 150 tier threshold. Keep farming AB and climbing the ladder toward the 1,500 parcel milestone.`;
+                }
+            }
+        }
+
         function updateNumbers() {
             document.getElementById("income").innerHTML = money(stats.currentIncome);
             document.getElementById("rent").innerHTML = money(stats.totalRent);
@@ -264,6 +330,7 @@
             document.getElementById("legendary").innerHTML = stats.legendary;
             document.getElementById("boostDisplay").innerHTML = stats.boost + "%";
             updateStrategy();
+            updatePathTo50();
         }
 
         function save() { localStorage.setItem("atlasDashboard", JSON.stringify(stats)); }
