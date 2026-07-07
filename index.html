@@ -5,112 +5,162 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Atlas Earth Dashboard</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&family=Space+Mono:wght@700&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: 'Poppins', sans-serif; background: linear-gradient(135deg, #071b2d, #0f3d5d, #1f7a3d); color: #fff; min-height: 100vh; }
-        header { text-align: center; padding: 40px 20px; }
-        header h1 { font-size: 3rem; margin-bottom: 10px; }
-        header p { opacity: .8; }
-        .container { width: 95%; max-width: 1300px; margin: auto; display: grid; gap: 25px; padding-bottom: 50px; }
-        .profile { display: flex; align-items: center; gap: 25px; background: rgba(255, 255, 255, .08); backdrop-filter: blur(18px); border-radius: 20px; padding: 25px; box-shadow: 0 15px 40px rgba(0, 0, 0, .4); }
-        .profile img { width: 120px; height: 120px; border-radius: 50%; border: 4px solid #00ff88; object-fit: cover; }
-        .cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 25px; }
-        .card { background: rgba(255, 255, 255, .08); backdrop-filter: blur(18px); border-radius: 20px; padding: 25px; box-shadow: 0 12px 35px rgba(0, 0, 0, .35); transition: .3s; animation: fadeIn .8s ease; }
-        .card:hover { transform: translateY(-6px); box-shadow: 0 20px 45px rgba(0, 0, 0, .5); }
-        .card h1 { color: #00ff88; margin-top: 10px; font-size: 2rem; }
-        .card h2 { margin-bottom: 20px; }
-        .card h3 { opacity: .9; }
-        table { width: 100%; border-collapse: collapse; }
-        td { padding: 12px; border-bottom: 1px solid rgba(255, 255, 255, .12); }
-        th { text-align: left; padding: 10px 12px; border-bottom: 2px solid rgba(255,255,255,0.2); color: #00ff88; }
+        body { 
+            font-family: 'Poppins', sans-serif; 
+            background: radial-gradient(circle at top left, #0f3d5d, #071b2d 40%, #030d17 100%); 
+            color: #fff; 
+            min-height: 100vh; 
+        }
         
+        header { text-align: center; padding: 50px 20px 30px; }
+        header h1 { font-size: 3rem; margin-bottom: 5px; text-shadow: 0 0 20px rgba(0, 255, 136, 0.4); }
+        header p { opacity: .8; font-weight: 300; letter-spacing: 1px; }
+        
+        .container { width: 95%; max-width: 1300px; margin: auto; display: grid; gap: 25px; padding-bottom: 50px; }
+        
+        /* Glassmorphism Classes */
+        .glass {
+            background: rgba(255, 255, 255, 0.03); 
+            backdrop-filter: blur(16px); 
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 20px; 
+            padding: 25px; 
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.4), inset 0 0 0 1px rgba(255, 255, 255, 0.02);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        .glass:hover { 
+            transform: translateY(-5px); 
+            box-shadow: 0 20px 45px rgba(0, 0, 0, 0.6), inset 0 0 0 1px rgba(0, 255, 136, 0.2); 
+        }
+
+        .profile { display: flex; align-items: center; gap: 25px; }
+        .profile img { width: 120px; height: 120px; border-radius: 50%; border: 4px solid #00ff88; box-shadow: 0 0 20px rgba(0, 255, 136, 0.5); object-fit: cover; }
+        
+        .cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 25px; }
+        
+        h1 { color: #00ff88; margin-top: 10px; font-size: 2.2rem; }
+        h2 { margin-bottom: 20px; font-weight: 600; letter-spacing: 0.5px; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 10px; }
+        h3 { opacity: .9; font-size: 1rem; text-transform: uppercase; letter-spacing: 1px; color: #a0aec0; }
+        
+        /* Live Digital Timer Styles */
+        .live-timer {
+            font-family: 'Space Mono', monospace;
+            color: #00ff88;
+            text-shadow: 0 0 15px rgba(0, 255, 136, 0.6);
+            letter-spacing: 1px;
+            font-size: 1.8rem;
+        }
+        .timer-small { font-size: 1.2rem; }
+
+        table { width: 100%; border-collapse: collapse; }
+        td { padding: 14px 10px; border-bottom: 1px solid rgba(255, 255, 255, 0.05); }
+        tr:hover td { background: rgba(255, 255, 255, 0.02); }
+        th { text-align: left; padding: 12px 10px; border-bottom: 2px solid rgba(0, 255, 136, 0.3); color: #00ff88; font-weight: 600; }
+        
+        /* Inputs */
         .input-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 15px; }
         .input-group { display: flex; flex-direction: column; }
-        .input-group label { font-size: 0.85rem; opacity: 0.8; margin-bottom: 5px; }
-        .input-group input { padding: 12px; border-radius: 8px; border: 1px solid rgba(0, 255, 136, 0.4); background: rgba(0, 0, 0, 0.3); color: white; font-family: 'Poppins', sans-serif; font-size: 1rem; outline: none; transition: 0.2s; }
-        .input-group input[type="checkbox"] { width: 22px; height: 22px; accent-color: #00ff88; cursor: pointer; }
-        .input-group input:focus { border-color: #00ff88; background: rgba(0, 0, 0, 0.5); }
-        .full-width { grid-column: span 2; }
-        .btn-update { grid-column: span 2; padding: 15px; border-radius: 12px; background: #00cc66; color: white; font-weight: bold; font-size: 1.1rem; border: none; cursor: pointer; transition: 0.2s; margin-top: 10px; font-family: 'Poppins', sans-serif; }
-        .btn-update:hover { background: #00ff88; color: #071b2d; transform: translateY(-2px); box-shadow: 0 5px 15px rgba(0,255,136,0.3); }
-
-        .bar { width: 100%; height: 22px; background: #233646; border-radius: 20px; overflow: hidden; margin: 10px 0 18px; }
-        .common, .rare, .epic, .legendary { height: 100%; transition: width 1s ease; }
-        .common { background: #7f8c8d; width: 50%; }
-        .rare { background: #3498db; width: 32%; }
-        .epic { background: #9b59b6; width: 14%; }
-        .legendary { background: #f1c40f; width: 4%; }
+        .input-group label { font-size: 0.85rem; color: #a0aec0; margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.5px; }
+        .input-group input { 
+            padding: 14px; border-radius: 10px; border: 1px solid rgba(0, 255, 136, 0.2); 
+            background: rgba(0, 0, 0, 0.4); color: #fff; font-family: 'Space Mono', monospace; 
+            font-size: 1.1rem; outline: none; transition: 0.3s; 
+        }
+        .input-group input[type="checkbox"] { width: 24px; height: 24px; accent-color: #00ff88; cursor: pointer; }
+        .input-group input:focus { border-color: #00ff88; background: rgba(0, 0, 0, 0.6); box-shadow: 0 0 15px rgba(0, 255, 136, 0.2); }
         
-        .toast { position: fixed; bottom: 30px; right: 30px; background: #00cc66; color: white; padding: 18px 24px; border-radius: 12px; box-shadow: 0 10px 30px rgba(0, 0, 0, .4); animation: fadeIn .5s; z-index: 9999; }
+        .full-width { grid-column: span 2; }
+        .btn-update { 
+            grid-column: span 2; padding: 16px; border-radius: 12px; 
+            background: linear-gradient(135deg, #00ff88, #00cc66); 
+            color: #071b2d; font-weight: 700; font-size: 1.1rem; border: none; 
+            cursor: pointer; transition: 0.3s; margin-top: 15px; text-transform: uppercase; letter-spacing: 1px;
+        }
+        .btn-update:hover { transform: translateY(-3px); box-shadow: 0 10px 25px rgba(0,255,136,0.4); }
+
+        /* Progress Bars */
+        .bar { width: 100%; height: 22px; background: rgba(0,0,0,0.5); border-radius: 20px; overflow: hidden; margin: 10px 0 18px; border: 1px solid rgba(255,255,255,0.05); }
+        .common, .rare, .epic, .legendary { height: 100%; transition: width 1s cubic-bezier(0.4, 0, 0.2, 1); }
+        .common { background: linear-gradient(90deg, #7f8c8d, #95a5a6); width: 50%; }
+        .rare { background: linear-gradient(90deg, #2980b9, #3498db); width: 32%; }
+        .epic { background: linear-gradient(90deg, #8e44ad, #9b59b6); width: 14%; }
+        .legendary { background: linear-gradient(90deg, #f39c12, #f1c40f); width: 4%; }
+        
+        /* Alerts */
+        .alert-box {
+            background: rgba(255, 193, 7, 0.05); border-left: 4px solid #ffc107; 
+            padding: 15px 20px; border-radius: 0 8px 8px 0; margin-top: 20px;
+        }
+        
+        .toast { position: fixed; bottom: 30px; right: 30px; background: #00ff88; color: #071b2d; font-weight: 600; padding: 18px 24px; border-radius: 12px; box-shadow: 0 10px 30px rgba(0, 0, 0, .4); animation: fadeIn .5s; z-index: 9999; }
         
         @keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
-        @media(max-width: 768px) { .profile { flex-direction: column; text-align: center; } header h1 { font-size: 2rem; } .card h1 { font-size: 1.5rem; } .container { width: 94%; } .input-grid { grid-template-columns: 1fr; } .full-width, .btn-update { grid-column: span 1; } }
+        @media(max-width: 768px) { .profile { flex-direction: column; text-align: center; } header h1 { font-size: 2rem; } .input-grid { grid-template-columns: 1fr; } .full-width, .btn-update { grid-column: span 1; } }
     </style>
 </head>
 <body>
 
     <header>
         <div class="logo">
-            <h1>🌍 Atlas Earth Dashboard</h1>
-            <p>Strategy & Manual Control</p>
+            <h1>🌍 Atlas Earth Hub</h1>
+            <p>Strategy, Analytics & Manual Calibration</p>
         </div>
     </header>
 
     <div class="container">
         <!-- Profile -->
-        <div class="profile">
-            <img id="avatar" src="https://placehold.co/150x150/1e293b/ffffff?text=AE" alt="Avatar">
+        <div class="glass profile">
+            <img id="avatar" src="https://placehold.co/150x150/1e293b/00ff88?text=AE" alt="Avatar">
             <div>
-                <h2>MOODYB</h2>
-                <p>👑 Mayor of Stenson Fields</p>
+                <h2 style="border:none; margin:0; font-size: 2rem; color:#fff;">MOODYB</h2>
+                <p style="color: #00ff88; font-weight: 600; letter-spacing: 1px;">👑 Mayor of Stenson Fields</p>
             </div>
         </div>
 
         <div class="cards">
-            <div class="card"><h3>📈 Daily Earnings</h3><h1 id="dailyEarnings">$0.00</h1></div>
-            <div class="card"><h3>🎯 Next $10</h3><h1 id="nextTen">Calculating...</h1></div>
-            <div class="card"><h3>⚡ Rent / Second</h3><h1 id="rentSecond">$0.00000000</h1></div>
+            <div class="glass"><h3>📈 Daily Earnings</h3><h1 id="dailyEarnings">$0.00</h1></div>
+            <div class="glass"><h3>🎯 Next $10 Drop</h3><h1 id="nextTen" class="live-timer">00:00:00</h1></div>
+            <div class="glass"><h3>⚡ Rent / Second</h3><h1 id="rentSecond" style="font-family: 'Space Mono', monospace;">$0.00000000</h1></div>
         </div>
 
         <div class="cards">
-            <div class="card"><h3>Current Income</h3><h1 id="income">$6.15229263</h1></div>
-            <div class="card"><h3>Total Rent Earned</h3><h1 id="rent">$15.15226684</h1></div>
+            <div class="glass"><h3>Current Income Balance</h3><h1 id="income" style="font-size: 2.8rem;">$6.15229263</h1></div>
+            <div class="glass"><h3>Total Rent Accrued</h3><h1 id="rent" style="font-size: 2.8rem; color: #a0aec0;">$15.15226684</h1></div>
         </div>
 
         <!-- CONTROL PANEL -->
-        <div class="card">
-            <h2>⚙️ Manual Update Panel</h2>
-            <p style="font-size: 0.9rem; opacity: 0.8;">Enter your latest stats to instantly recalibrate.</p>
+        <div class="glass">
+            <h2>⚙️ System Calibration</h2>
+            <p style="font-size: 0.9rem; color: #a0aec0;">Input your latest in-game metrics to sync the analytics engine.</p>
             <div class="input-grid">
                 <div class="input-group"><label>Current Income ($)</label><input type="number" id="inpIncome" step="0.00000001"></div>
                 <div class="input-group"><label>Total Rent Accrued ($)</label><input type="number" id="inpRent" step="0.00000001"></div>
-                <div class="input-group"><label>Current Atlas Bucks (AB)</label><input type="number" id="inpAB"></div>
+                <div class="input-group"><label>Atlas Bucks Vault (AB)</label><input type="number" id="inpAB"></div>
                 <div class="input-group"><label>Badge Boost (%)</label><input type="number" id="inpBoost"></div>
                 <div class="input-group"><label>Common Parcels</label><input type="number" id="inpCommon"></div>
                 <div class="input-group"><label>Rare Parcels</label><input type="number" id="inpRare"></div>
                 <div class="input-group"><label>Epic Parcels</label><input type="number" id="inpEpic"></div>
                 <div class="input-group"><label>Legendary Parcels</label><input type="number" id="inpLegendary"></div>
-                <button class="btn-update" onclick="saveManualData()">Sync Dashboard Data</button>
+                <button class="btn-update" onclick="saveManualData()">Sync Dashboard</button>
             </div>
         </div>
 
         <div class="cards">
             <!-- DAILY AB TRACKER -->
-            <div class="card">
-                <h2>💎 Atlas Buck Bank</h2>
-                <p style="margin-bottom: 10px; font-size: 0.9rem; opacity: 0.8;">Your daily AB accumulation.</p>
-                <h1 id="abDisplay" style="color: #2196F3; font-size: 2.8rem; margin-bottom: 20px;">0 AB</h1>
+            <div class="glass">
+                <h2>💎 Atlas Bank Vault</h2>
+                <p style="margin-bottom: 15px; font-size: 0.9rem; color: #a0aec0;">Your daily AB accumulation & velocity.</p>
+                <h1 id="abDisplay" class="live-timer" style="color: #2196F3; font-size: 3.2rem; margin-bottom: 25px; text-shadow: 0 0 15px rgba(33,150,243,0.5);">0 AB</h1>
                 
-                <table style="width: 100%; font-size: 0.9rem;">
+                <table>
                     <thead>
-                        <tr>
-                            <th>Date</th>
-                            <th>Total Bank</th>
-                            <th>Daily Growth</th>
-                        </tr>
+                        <tr><th>Date</th><th>Total Bank</th><th>Velocity</th></tr>
                     </thead>
                     <tbody id="abHistoryList">
                         <!-- JS populated -->
@@ -119,81 +169,96 @@
             </div>
 
             <!-- PARCEL STATS -->
-            <div class="card">
-                <h2>Parcel Statistics</h2>
+            <div class="glass">
+                <h2>Portfolio Breakdown</h2>
                 <table>
-                    <tr><td>Total Parcels</td><td id="total">104</td></tr>
+                    <tr><td>Total Parcels</td><td id="total" style="font-weight: bold; font-size: 1.1rem;">104</td></tr>
                     <tr><td>Common</td><td id="common">52</td></tr>
                     <tr><td>Rare</td><td id="rare">33</td></tr>
                     <tr><td>Epic</td><td id="epic">15</td></tr>
                     <tr><td>Legendary</td><td id="legendary">4</td></tr>
-                    <tr><td>Badge Boost</td><td id="boostDisplay">10%</td></tr>
+                    <tr><td>Active Badge Boost</td><td id="boostDisplay" style="color: #00ff88; font-weight: bold;">10%</td></tr>
                 </table>
             </div>
         </div>
 
         <div class="cards">
-            <div class="card">
-                <h2>Estimated Income (Base)</h2>
+            <div class="glass">
+                <h2>Base Yield Estimates</h2>
                 <table>
-                    <tr><td>Per Hour</td><td id="hour">$0.00</td></tr>
-                    <tr><td>Per Day</td><td id="day">$0.00</td></tr>
-                    <tr><td>Per Month</td><td id="month">$0.00</td></tr>
-                    <tr><td>Per Year</td><td id="year">$0.00</td></tr>
+                    <tr><td>Per Hour</td><td id="hour" class="live-timer timer-small">$0.00</td></tr>
+                    <tr><td>Per Day</td><td id="day" class="live-timer timer-small">$0.00</td></tr>
+                    <tr><td>Per Month</td><td id="month" class="live-timer timer-small">$0.00</td></tr>
+                    <tr><td>Per Year</td><td id="year" class="live-timer timer-small">$0.00</td></tr>
                 </table>
             </div>
             
-            <div class="card">
-                <h2>⚖️ Strategy ROI</h2>
+            <div class="glass">
+                <h2>⚖️ ROI Optimization</h2>
                 <table>
-                    <tr><td>1 Avg Parcel</td><td id="valParcel">$0.00 /yr</td></tr>
-                    <tr><td>+5% Tier Jump</td><td id="valBadge">$0.00 /yr</td></tr>
+                    <tr><td>Value of 1 Avg Parcel</td><td id="valParcel" style="color: #00ff88;">$0.00 /yr</td></tr>
+                    <tr><td>Value of +5% Tier Jump</td><td id="valBadge" style="color: #2196F3;">$0.00 /yr</td></tr>
                 </table>
-                <p id="roiRecommendation" style="margin-top:20px; font-size:0.95rem; color:#00ff88; text-align:center; font-weight:600; line-height:1.5;">Analyzing layout...</p>
+                <div style="background: rgba(0,0,0,0.3); padding: 15px; border-radius: 10px; margin-top: 20px;">
+                    <p id="roiRecommendation" style="font-size:0.95rem; color:#00ff88; text-align:center; font-weight:600; line-height:1.5;">Analyzing layout...</p>
+                </div>
             </div>
         </div>
 
         <div class="cards">
-            <div class="card">
-                <h2>📈 Earnings History</h2>
-                <canvas id="earningsChart"></canvas>
+            <div class="glass full-width">
+                <h2>📈 Live Revenue Stream</h2>
+                <canvas id="earningsChart" height="80"></canvas>
             </div>
+        </div>
 
-            <div class="card">
-                <h2>🚀 The Path to $50/mo</h2>
-                <p style="margin-bottom: 15px; font-size: 0.9rem; opacity: 0.8;">Your UK strategic roadmap to hitting 1,500 parcels.</p>
-                
-                <div class="input-grid" style="margin-bottom: 20px; background: rgba(0,0,0,0.2); padding: 15px; border-radius: 10px;">
+        <div class="glass">
+            <h2>🚀 Operation $50/Month</h2>
+            <p style="margin-bottom: 25px; font-size: 0.95rem; color: #a0aec0;">UK Strategic roadmap to achieving the 1,500 parcel milestone.</p>
+            
+            <div class="cards" style="margin-bottom: 30px;">
+                <div style="background: rgba(0,0,0,0.2); padding: 20px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.05);">
                     <div class="input-group">
                         <label>Est. Daily Free AB (Ads/Spins)</label>
                         <input type="number" id="inpDailyAB" value="40" onchange="saveManualData()">
                     </div>
-                    <div class="input-group" style="flex-direction: row; align-items: center; gap: 10px; margin-top: 20px;">
+                    <div class="input-group" style="flex-direction: row; align-items: center; gap: 12px; margin-top: 20px;">
                         <input type="checkbox" id="inpExplorer" onchange="saveManualData()">
-                        <label style="margin: 0; font-size: 1rem; color: #00ff88;">Active Explorer Club</label>
+                        <label style="margin: 0; font-size: 1.1rem; color: #00ff88; font-weight: 600;">Active Explorer Club</label>
                     </div>
                 </div>
-
-                <table>
-                    <tr><td>Projected Date</td><td id="projectedDate" style="color: #00ff88; font-weight: bold; font-size: 1.1rem;">Calculating...</td></tr>
-                    <tr><td>EC Subscriptions</td><td id="ecMonthsRequired">0 Months</td></tr>
-                </table>
                 
-                <div class="bar" style="height: 12px; margin: 10px 0;"><div id="bar50" style="height: 100%; width: 0%; background: #00ff88; transition: width 1s;"></div></div>
-                
-                <div style="background: rgba(255, 193, 7, 0.1); border-left: 4px solid #ffc107; padding: 15px; border-radius: 4px; margin-top: 15px;">
-                    <strong style="color: #ffc107; font-size: 1.1rem;">⚠️ UK Tier Console:</strong>
-                    <p id="tierWarning" style="font-size: 0.85rem; margin-top: 5px; line-height: 1.4;">Analyzing tier...</p>
+                <div style="background: rgba(0,0,0,0.2); padding: 20px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.05); display: flex; flex-direction: column; justify-content: center;">
+                    <h3 style="margin-bottom: 10px; text-transform: none;">Live Countdown to Goal</h3>
+                    <h1 id="countdown50" class="live-timer" style="font-size: 2.2rem; margin: 0;">Calculating...</h1>
+                    <p id="projectedDate" style="color: #a0aec0; margin-top: 10px; font-size: 0.9rem;">Target Date: --</p>
+                    <p id="ecMonthsRequired" style="color: #2196F3; font-size: 0.9rem; margin-top: 5px; font-weight: 600;">EC Subscriptions: 0</p>
                 </div>
+            </div>
+
+            <h3 style="margin-bottom: 5px;">Milestone Progress (1,500 Parcels)</h3>
+            <div class="bar" style="height: 16px; margin: 10px 0 25px;"><div id="bar50" style="height: 100%; width: 0%; background: linear-gradient(90deg, #00c853, #00ff88); transition: width 1s ease-out; box-shadow: 0 0 10px rgba(0,255,136,0.5);"></div></div>
+            
+            <div class="alert-box">
+                <strong style="color: #ffc107; font-size: 1.1rem; letter-spacing: 0.5px;">⚠️ UK TIER CONSOLE:</strong>
+                <p id="tierWarning" style="font-size: 0.95rem; margin-top: 8px; line-height: 1.5; color: #e2e8f0;">Analyzing tier location...</p>
             </div>
         </div>
 
-        <div class="card">
-            <h2>Parcel Breakdown</h2>
-            <p>Common</p><div class="bar"><div class="common" id="commonBar"></div></div>
-            <p>Rare</p><div class="bar"><div class="rare" id="rareBar"></div></div>
-            <p>Epic</p><div class="bar"><div class="epic" id="epicBar"></div></div>
-            <p>Legendary</p><div class="bar"><div class="legendary" id="legendaryBar"></div></div>
+        <div class="glass">
+            <h2>Visual Portfolio Distribution</h2>
+            <div style="display: grid; grid-template-columns: 80px 1fr; align-items: center; gap: 15px; margin-bottom: 10px;">
+                <p style="font-weight: 600; color: #a0aec0;">Common</p><div class="bar" style="margin: 0;"><div class="common" id="commonBar"></div></div>
+            </div>
+            <div style="display: grid; grid-template-columns: 80px 1fr; align-items: center; gap: 15px; margin-bottom: 10px;">
+                <p style="font-weight: 600; color: #2980b9;">Rare</p><div class="bar" style="margin: 0;"><div class="rare" id="rareBar"></div></div>
+            </div>
+            <div style="display: grid; grid-template-columns: 80px 1fr; align-items: center; gap: 15px; margin-bottom: 10px;">
+                <p style="font-weight: 600; color: #9b59b6;">Epic</p><div class="bar" style="margin: 0;"><div class="epic" id="epicBar"></div></div>
+            </div>
+            <div style="display: grid; grid-template-columns: 80px 1fr; align-items: center; gap: 15px; margin-bottom: 10px;">
+                <p style="font-weight: 600; color: #f1c40f;">Legend.</p><div class="bar" style="margin: 0;"><div class="legendary" id="legendaryBar"></div></div>
+            </div>
         </div>
     </div>
 
@@ -211,6 +276,8 @@
             hasExplorerClub: false
         };
         const rates = { common: 0.0000000011, rare: 0.0000000016, epic: 0.0000000022, legendary: 0.0000000044 };
+        
+        let targetDate50 = null; // Global variable for the countdown timer
 
         function totalParcels() { return stats.common + stats.rare + stats.epic + stats.legendary; }
         function rentPerSecond() { return ((stats.common * rates.common) + (stats.rare * rates.rare) + (stats.epic * rates.epic) + (stats.legendary * rates.legendary)) * (1 + (stats.boost / 100)); }
@@ -229,7 +296,6 @@
             if(document.getElementById("inpExplorer")) document.getElementById("inpExplorer").checked = stats.hasExplorerClub;
         }
 
-        // --- NEW: AB Daily Log Engine ---
         let abHistory = JSON.parse(localStorage.getItem("abDailyHistory")) || {};
         
         function logDailyAB() {
@@ -241,36 +307,32 @@
 
         function renderABHistory() {
             document.getElementById("abDisplay").innerHTML = (stats.currentAB || 0) + " AB";
-            
             let el = document.getElementById("abHistoryList");
             if(!el) return;
             let html = "";
-            
-            // Get dates sorted newest first (Note: simplistic string sort works if formatting aligns, better to rely on insertion order for simple use case or parse dates. Using reverse array for now)
             let dates = Object.keys(abHistory);
             
             if(dates.length === 0) {
-                el.innerHTML = "<tr><td colspan='3' style='text-align:center; opacity:0.5;'>Update your AB to start tracking!</td></tr>";
+                el.innerHTML = "<tr><td colspan='3' style='text-align:center; opacity:0.5;'>Update your AB vault to start tracking!</td></tr>";
                 return;
             }
 
-            // Reverse to show newest at top
             dates.reverse();
 
-            for(let i=0; i < Math.min(dates.length, 6); i++) {
+            for(let i=0; i < Math.min(dates.length, 5); i++) {
                 let date = dates[i];
                 let ab = abHistory[date];
                 let prevDate = dates[i+1];
                 let diff = prevDate ? (ab - abHistory[prevDate]) : 0;
                 
                 let diffStr = "-";
-                let color = "#ffffff";
+                let color = "#a0aec0";
                 if(prevDate) {
-                    diffStr = diff >= 0 ? `+${diff} AB` : `${diff} AB`;
-                    color = diff > 0 ? '#00ff88' : (diff < 0 ? '#ff4444' : '#ffffff');
+                    diffStr = diff >= 0 ? `+${diff}` : `${diff}`;
+                    color = diff > 0 ? '#00ff88' : (diff < 0 ? '#ff4444' : '#a0aec0');
                 }
 
-                html += `<tr><td style="padding: 8px 12px;">${date}</td><td style="padding: 8px 12px;">${ab} AB</td><td style="padding: 8px 12px; color:${color}; font-weight:bold;">${diffStr}</td></tr>`;
+                html += `<tr><td>${date}</td><td style="font-family:'Space Mono', monospace;">${ab} AB</td><td style="font-family:'Space Mono', monospace; color:${color}; font-weight:bold;">${diffStr}</td></tr>`;
             }
             el.innerHTML = html;
         }
@@ -300,7 +362,7 @@
 
             logDailyAB();
             updateNumbers(); updateIncome(); updateBars(); updateDashboard(); save();
-            showToast("✅ Dashboard Successfully Calibrated!");
+            showToast("DATA SYNC SUCCESSFUL");
         }
 
         function updateIncome() {
@@ -334,47 +396,50 @@
             let total = totalParcels();
             let parcelsNeeded = badgeGainYear / parcelGainYear;
 
-            let recHTML = `A 5% badge jump gives the same rent as buying <b>${parcelsNeeded.toFixed(1)} average parcels.</b><br><br>`;
+            let recHTML = `A 5% Badge jump yields the exact same yearly rent as buying <b>${parcelsNeeded.toFixed(1)} average parcels.</b><br><br>`;
             if (total >= 150 && total < 220) {
                 recHTML += "<span style='color:#ffc107'>⚠️ You are at the 150 parcel tier drop! Save AB to jump straight to 220.</span>";
             } else if (parcelsNeeded > 20) {
-                recHTML += "<span style='color:#00ff88'>⭐ Buy Badges! A tier jump is mathematically better than buying land right now.</span>";
+                recHTML += "<span style='color:#00ff88'>⭐ ACQUIRE BADGES: A tier jump is mathematically superior to acquiring land right now.</span>";
             } else {
-                recHTML += "<span style='color:#2196F3'>📍 Buy Land! Parcels provide higher ROI for your Atlas Bucks right now.</span>";
+                recHTML += "<span style='color:#2196F3'>📍 ACQUIRE LAND: Parcels provide higher ROI for your Atlas Bucks right now.</span>";
             }
             elRec.innerHTML = recHTML;
         }
 
         function updatePathTo50() {
             let monthlyAB = (stats.dailyAB || 0) * 30;
-            // Add average monthly AB from Explorer Club (approx 10,953 AB over 90 days)
             if (stats.hasExplorerClub) monthlyAB += 3651; 
 
             let total = totalParcels();
             let parcelsNeeded = Math.max(0, 1500 - total);
             let abNeededForParcels = parcelsNeeded * 100;
-            let abNeededForBadges = 16000; // Assuming ~80 more badges needed for max 25% boost
+            let abNeededForBadges = 16000; 
             let totalABNeeded = abNeededForParcels + abNeededForBadges;
             
-            // Subtract Current Bank from Goal
             let remainingABNeeded = Math.max(0, totalABNeeded - (stats.currentAB || 0));
 
             let monthsRequired = monthlyAB > 0 ? (remainingABNeeded / monthlyAB) : 999;
-            let targetDate = new Date();
-            targetDate.setMonth(targetDate.getMonth() + monthsRequired);
+            
+            if (monthsRequired < 600) {
+                targetDate50 = new Date();
+                targetDate50.setMonth(targetDate50.getMonth() + monthsRequired);
+            } else {
+                targetDate50 = null; // Unreachable
+            }
 
             let elDate = document.getElementById("projectedDate");
             let elEC = document.getElementById("ecMonthsRequired");
             
             if (elDate) {
-                elDate.innerHTML = monthlyAB > 0 ? targetDate.toLocaleDateString(undefined, {month: 'long', year: 'numeric'}) : "Never (Earn more AB)";
+                elDate.innerHTML = targetDate50 ? "Target: " + targetDate50.toLocaleDateString(undefined, {month: 'long', year: 'numeric'}) : "Target: Increase AB Velocity";
             }
             if (elEC) {
                 if (stats.hasExplorerClub) {
                     let monthsCost = Math.ceil(monthsRequired);
-                    elEC.innerHTML = `${monthsCost} Months ($${(monthsCost * 49.99).toFixed(2)})`;
+                    elEC.innerHTML = `EC Subscriptions Required: ${monthsCost} ($${(monthsCost * 49.99).toFixed(2)})`;
                 } else {
-                    elEC.innerHTML = "Not Active";
+                    elEC.innerHTML = "EC Subscription: INACTIVE";
                 }
             }
 
@@ -386,15 +451,15 @@
             let warnEl = document.getElementById("tierWarning");
             if (warnEl) {
                 if (total < 60) {
-                    warnEl.innerHTML = `You are in the 20x tier. Your multiplier drops to 15x at 61 parcels. Stop buying at 60 and save AB to jump to the next bracket!`;
+                    warnEl.innerHTML = `Current multiplier: <b>20x</b>. Drops to <b>15x</b> at 61 parcels. Stop buying at exactly 60 and stockpile AB to jump into the next bracket.`;
                 } else if (total === 60) {
-                    warnEl.innerHTML = `⚠️ DANGER ZONE: You are at exactly 60 parcels. Do not buy parcel #61! Save AB to perform a tier jump.`;
+                    warnEl.innerHTML = `<b>CRITICAL:</b> You are exactly at the 60 parcel limit. Do not acquire parcel #61! Hoard AB to execute a tier jump.`;
                 } else if (total < 150) {
-                    warnEl.innerHTML = `You are in the 15x tier. Your multiplier drops to 10x at 151 parcels. Stop buying at 150 and save roughly 7,000 AB to jump past the 220 limit!`;
+                    warnEl.innerHTML = `Current multiplier: <b>15x</b>. Drops to <b>10x</b> at 151 parcels. Stop buying at exactly 150 and save ~7,000 AB to safely jump to the 220 limit.`;
                 } else if (total === 150) {
-                    warnEl.innerHTML = `⚠️ DANGER ZONE: You are at exactly 150 parcels. Do not buy parcel #151 or your multiplier will drop to 10x. Save roughly 7,000 AB to jump past the 220 limit!`;
+                    warnEl.innerHTML = `<b>CRITICAL:</b> You are exactly at the 150 parcel limit. Do not acquire parcel #151! Save ~7,000 AB to execute a tier jump to 220.`;
                 } else {
-                    warnEl.innerHTML = `You are past the 150 tier threshold. Keep farming AB and climbing the ladder toward the 1,500 parcel milestone.`;
+                    warnEl.innerHTML = `You have cleared the 150 tier threshold. Maintain AB velocity and climb toward the 1,500 target.`;
                 }
             }
         }
@@ -420,22 +485,55 @@
             renderABHistory();
         }
 
-        function formatTime(seconds) {
-            if(seconds <= 0) return "Complete";
-            let days = Math.floor(seconds / 86400);
-            let hours = Math.floor((seconds % 86400) / 3600);
-            let mins = Math.floor((seconds % 3600) / 60);
-            return `${days}d ${hours}h ${mins}m`;
+        function padZero(num) { return num.toString().padStart(2, '0'); }
+
+        function formatDigitalTime(seconds) {
+            if(seconds <= 0) return "ACHIEVED";
+            let d = Math.floor(seconds / 86400);
+            let h = Math.floor((seconds % 86400) / 3600);
+            let m = Math.floor((seconds % 3600) / 60);
+            let s = Math.floor(seconds % 60);
+            
+            if (d > 0) return `${d}d ${padZero(h)}h ${padZero(m)}m ${padZero(s)}s`;
+            return `${padZero(h)}:${padZero(m)}:${padZero(s)}`;
         }
 
         function updateDashboard() {
             const second = rentPerSecond();
             document.getElementById("rentSecond").innerHTML = money(second);
             document.getElementById("dailyEarnings").innerHTML = money(second * 86400);
+            
+            // Next $10 Live Timer
             const next = document.getElementById("nextTen");
             if(next) {
-                const remain = 10 - (stats.currentIncome % 10);
-                next.innerHTML = remain <= 0 ? "Reached" : formatTime(remain / second);
+                const remainMoney = 10 - (stats.currentIncome % 10);
+                const secondsRemain = remainMoney / second;
+                next.innerHTML = formatDigitalTime(secondsRemain);
+            }
+
+            // Path to 50 Live Timer
+            const count50 = document.getElementById("countdown50");
+            if(count50) {
+                if(targetDate50) {
+                    let now = new Date();
+                    let diffSeconds = (targetDate50 - now) / 1000;
+                    if(diffSeconds > 0) {
+                        let y = Math.floor(diffSeconds / (86400 * 365.25));
+                        let d = Math.floor((diffSeconds % (86400 * 365.25)) / 86400);
+                        let h = Math.floor((diffSeconds % 86400) / 3600);
+                        let m = Math.floor((diffSeconds % 3600) / 60);
+                        let s = Math.floor(diffSeconds % 60);
+                        
+                        let timeStr = "";
+                        if (y > 0) timeStr += `${y}y `;
+                        timeStr += `${d}d ${padZero(h)}h ${padZero(m)}m ${padZero(s)}s`;
+                        count50.innerHTML = timeStr;
+                    } else {
+                        count50.innerHTML = "GOAL SECURED";
+                    }
+                } else {
+                    count50.innerHTML = "INSUFFICIENT AB";
+                }
             }
         }
 
@@ -450,7 +548,7 @@
             toast.className = "toast";
             toast.innerHTML = msg;
             document.body.appendChild(toast);
-            setTimeout(() => toast.remove(), 3500);
+            setTimeout(() => toast.remove(), 3000);
         }
 
         let earningsHistory = JSON.parse(localStorage.getItem("earningsHistory")) || [];
@@ -463,8 +561,8 @@
         const ctx = document.getElementById("earningsChart");
         const chart = new Chart(ctx, {
             type: "line",
-            data: { labels: earningsHistory.map(x => x.date), datasets: [{ label: "Live Income", data: earningsHistory.map(x => x.income), tension: .35, fill: true, borderColor: '#00ff88', backgroundColor: 'rgba(0, 255, 136, 0.1)', borderWidth: 3 }] },
-            options: { responsive: true, plugins: { legend: { labels: { color: "white" } } }, scales: { x: { ticks: { color: "white", maxTicksLimit: 6 } }, y: { ticks: { color: "white" } } } }
+            data: { labels: earningsHistory.map(x => x.date), datasets: [{ label: "Live Income Stream", data: earningsHistory.map(x => x.income), tension: .4, fill: true, borderColor: '#00ff88', backgroundColor: 'rgba(0, 255, 136, 0.15)', borderWidth: 3, pointRadius: 0 }] },
+            options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { x: { display: false }, y: { ticks: { color: "#a0aec0" }, grid: { color: "rgba(255,255,255,0.05)" } } } }
         });
 
         setInterval(() => {
