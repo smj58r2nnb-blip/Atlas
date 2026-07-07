@@ -208,7 +208,10 @@
         <div class="cards">
             <div class="glass full-width">
                 <h2>📈 Live Revenue Stream</h2>
-                <canvas id="earningsChart" height="80"></canvas>
+                <!-- Fixed Height Wrapper to prevent chart explosion -->
+                <div style="position: relative; height: 250px; width: 100%;">
+                    <canvas id="earningsChart"></canvas>
+                </div>
             </div>
         </div>
 
@@ -277,7 +280,7 @@
         };
         const rates = { common: 0.0000000011, rare: 0.0000000016, epic: 0.0000000022, legendary: 0.0000000044 };
         
-        let targetDate50 = null; // Global variable for the countdown timer
+        let targetDate50 = null; 
 
         function totalParcels() { return stats.common + stats.rare + stats.epic + stats.legendary; }
         function rentPerSecond() { return ((stats.common * rates.common) + (stats.rare * rates.rare) + (stats.epic * rates.epic) + (stats.legendary * rates.legendary)) * (1 + (stats.boost / 100)); }
@@ -425,7 +428,7 @@
                 targetDate50 = new Date();
                 targetDate50.setMonth(targetDate50.getMonth() + monthsRequired);
             } else {
-                targetDate50 = null; // Unreachable
+                targetDate50 = null; 
             }
 
             let elDate = document.getElementById("projectedDate");
