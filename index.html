@@ -3,43 +3,22 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Atlas Earth</title>
+    <title>Atlas Earth Dashboard</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        body {
-            font-family: 'Poppins', sans-serif;
-            background: linear-gradient(135deg, #071b2d, #0f3d5d, #1f7a3d);
-            color: #fff;
-            min-height: 100vh;
-        }
+        body { font-family: 'Poppins', sans-serif; background: linear-gradient(135deg, #071b2d, #0f3d5d, #1f7a3d); color: #fff; min-height: 100vh; }
         header { text-align: center; padding: 40px 20px; }
         header h1 { font-size: 3rem; margin-bottom: 10px; }
         header p { opacity: .8; }
-        .container {
-            width: 95%; max-width: 1300px; margin: auto;
-            display: grid; gap: 25px; padding-bottom: 50px;
-        }
-        .profile {
-            display: flex; align-items: center; gap: 25px;
-            background: rgba(255, 255, 255, .08); backdrop-filter: blur(18px);
-            border-radius: 20px; padding: 25px; box-shadow: 0 15px 40px rgba(0, 0, 0, .4);
-        }
-        .profile img {
-            width: 120px; height: 120px; border-radius: 50%;
-            border: 4px solid #00ff88; object-fit: cover;
-        }
-        .cards {
-            display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 25px;
-        }
-        .card {
-            background: rgba(255, 255, 255, .08); backdrop-filter: blur(18px);
-            border-radius: 20px; padding: 25px; box-shadow: 0 12px 35px rgba(0, 0, 0, .35);
-            transition: .3s; animation: fadeIn .8s ease;
-        }
+        .container { width: 95%; max-width: 1300px; margin: auto; display: grid; gap: 25px; padding-bottom: 50px; }
+        .profile { display: flex; align-items: center; gap: 25px; background: rgba(255, 255, 255, .08); backdrop-filter: blur(18px); border-radius: 20px; padding: 25px; box-shadow: 0 15px 40px rgba(0, 0, 0, .4); }
+        .profile img { width: 120px; height: 120px; border-radius: 50%; border: 4px solid #00ff88; object-fit: cover; }
+        .cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 25px; }
+        .card { background: rgba(255, 255, 255, .08); backdrop-filter: blur(18px); border-radius: 20px; padding: 25px; box-shadow: 0 12px 35px rgba(0, 0, 0, .35); transition: .3s; animation: fadeIn .8s ease; }
         .card:hover { transform: translateY(-6px); box-shadow: 0 20px 45px rgba(0, 0, 0, .5); }
         .card h1 { color: #00ff88; margin-top: 10px; font-size: 2rem; }
         .card h2 { margin-bottom: 20px; }
@@ -47,53 +26,26 @@
         table { width: 100%; border-collapse: collapse; }
         td { padding: 12px; border-bottom: 1px solid rgba(255, 255, 255, .12); }
         
-        /* Input Form Styles */
-        .input-grid {
-            display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 15px;
-        }
+        .input-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 15px; }
         .input-group { display: flex; flex-direction: column; }
         .input-group label { font-size: 0.85rem; opacity: 0.8; margin-bottom: 5px; }
-        .input-group input {
-            padding: 12px; border-radius: 8px; border: 1px solid rgba(0, 255, 136, 0.4);
-            background: rgba(0, 0, 0, 0.3); color: white; font-family: 'Poppins', sans-serif;
-            font-size: 1rem; outline: none; transition: 0.2s;
-        }
+        .input-group input { padding: 12px; border-radius: 8px; border: 1px solid rgba(0, 255, 136, 0.4); background: rgba(0, 0, 0, 0.3); color: white; font-family: 'Poppins', sans-serif; font-size: 1rem; outline: none; transition: 0.2s; }
         .input-group input:focus { border-color: #00ff88; background: rgba(0, 0, 0, 0.5); }
         .full-width { grid-column: span 2; }
-        .btn-update {
-            grid-column: span 2; padding: 15px; border-radius: 12px; background: #00cc66;
-            color: white; font-weight: bold; font-size: 1.1rem; border: none; cursor: pointer;
-            transition: 0.2s; margin-top: 10px; font-family: 'Poppins', sans-serif;
-        }
+        .btn-update { grid-column: span 2; padding: 15px; border-radius: 12px; background: #00cc66; color: white; font-weight: bold; font-size: 1.1rem; border: none; cursor: pointer; transition: 0.2s; margin-top: 10px; font-family: 'Poppins', sans-serif; }
         .btn-update:hover { background: #00ff88; color: #071b2d; transform: translateY(-2px); box-shadow: 0 5px 15px rgba(0,255,136,0.3); }
 
-        .bar {
-            width: 100%; height: 22px; background: #233646;
-            border-radius: 20px; overflow: hidden; margin: 10px 0 18px;
-        }
+        .bar { width: 100%; height: 22px; background: #233646; border-radius: 20px; overflow: hidden; margin: 10px 0 18px; }
         .common, .rare, .epic, .legendary { height: 100%; transition: width 1s ease; }
         .common { background: #7f8c8d; width: 50%; }
         .rare { background: #3498db; width: 32%; }
         .epic { background: #9b59b6; width: 14%; }
         .legendary { background: #f1c40f; width: 4%; }
         
-        .toast {
-            position: fixed; bottom: 30px; right: 30px; background: #00cc66;
-            color: white; padding: 18px 24px; border-radius: 12px;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, .4); animation: fadeIn .5s; z-index: 9999;
-        }
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(20px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-        @media(max-width: 768px) {
-            .profile { flex-direction: column; text-align: center; }
-            header h1 { font-size: 2rem; }
-            .card h1 { font-size: 1.5rem; }
-            .container { width: 94%; }
-            .input-grid { grid-template-columns: 1fr; }
-            .full-width, .btn-update { grid-column: span 1; }
-        }
+        .toast { position: fixed; bottom: 30px; right: 30px; background: #00cc66; color: white; padding: 18px 24px; border-radius: 12px; box-shadow: 0 10px 30px rgba(0, 0, 0, .4); animation: fadeIn .5s; z-index: 9999; }
+        
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        @media(max-width: 768px) { .profile { flex-direction: column; text-align: center; } header h1 { font-size: 2rem; } .card h1 { font-size: 1.5rem; } .container { width: 94%; } .input-grid { grid-template-columns: 1fr; } .full-width, .btn-update { grid-column: span 1; } }
     </style>
 </head>
 <body>
@@ -101,7 +53,7 @@
     <header>
         <div class="logo">
             <h1>🌍 Atlas Earth Dashboard</h1>
-            <p>Manual Control Edition</p>
+            <p>Strategy & Manual Control</p>
         </div>
     </header>
 
@@ -115,64 +67,27 @@
         </div>
 
         <div class="cards">
-            <div class="card">
-                <h3>📈 Daily Earnings</h3>
-                <h1 id="dailyEarnings">$0.00</h1>
-            </div>
-            <div class="card">
-                <h3>🎯 Next $10</h3>
-                <h1 id="nextTen">Calculating...</h1>
-            </div>
-            <div class="card">
-                <h3>⚡ Rent / Second</h3>
-                <h1 id="rentSecond">$0.00000000</h1>
-            </div>
+            <div class="card"><h3>📈 Daily Earnings</h3><h1 id="dailyEarnings">$0.00</h1></div>
+            <div class="card"><h3>🎯 Next $10</h3><h1 id="nextTen">Calculating...</h1></div>
+            <div class="card"><h3>⚡ Rent / Second</h3><h1 id="rentSecond">$0.00000000</h1></div>
         </div>
 
         <div class="cards">
-            <div class="card">
-                <h3>Current Income</h3>
-                <h1 id="income">$6.15229263</h1>
-            </div>
-            <div class="card">
-                <h3>Total Rent Earned</h3>
-                <h1 id="rent">$15.15226684</h1>
-            </div>
+            <div class="card"><h3>Current Income</h3><h1 id="income">$6.15229263</h1></div>
+            <div class="card"><h3>Total Rent Earned</h3><h1 id="rent">$15.15226684</h1></div>
         </div>
 
         <div class="card">
             <h2>⚙️ Manual Update Panel</h2>
-            <p style="font-size: 0.9rem; opacity: 0.8;">Enter your latest stats to instantly recalibrate the dashboard.</p>
-            
+            <p style="font-size: 0.9rem; opacity: 0.8;">Enter your latest stats to instantly recalibrate.</p>
             <div class="input-grid">
-                <div class="input-group">
-                    <label>Current Income ($)</label>
-                    <input type="number" id="inpIncome" step="0.00000001">
-                </div>
-                <div class="input-group">
-                    <label>Total Rent Accrued ($)</label>
-                    <input type="number" id="inpRent" step="0.00000001">
-                </div>
-                <div class="input-group">
-                    <label>Common Parcels</label>
-                    <input type="number" id="inpCommon">
-                </div>
-                <div class="input-group">
-                    <label>Rare Parcels</label>
-                    <input type="number" id="inpRare">
-                </div>
-                <div class="input-group">
-                    <label>Epic Parcels</label>
-                    <input type="number" id="inpEpic">
-                </div>
-                <div class="input-group">
-                    <label>Legendary Parcels</label>
-                    <input type="number" id="inpLegendary">
-                </div>
-                <div class="input-group full-width">
-                    <label>Badge Boost (%)</label>
-                    <input type="number" id="inpBoost">
-                </div>
+                <div class="input-group"><label>Current Income ($)</label><input type="number" id="inpIncome" step="0.00000001"></div>
+                <div class="input-group"><label>Total Rent Accrued ($)</label><input type="number" id="inpRent" step="0.00000001"></div>
+                <div class="input-group"><label>Common Parcels</label><input type="number" id="inpCommon"></div>
+                <div class="input-group"><label>Rare Parcels</label><input type="number" id="inpRare"></div>
+                <div class="input-group"><label>Epic Parcels</label><input type="number" id="inpEpic"></div>
+                <div class="input-group"><label>Legendary Parcels</label><input type="number" id="inpLegendary"></div>
+                <div class="input-group full-width"><label>Badge Boost (%)</label><input type="number" id="inpBoost"></div>
                 <button class="btn-update" onclick="saveManualData()">Sync Dashboard Data</button>
             </div>
         </div>
@@ -191,7 +106,7 @@
             </div>
 
             <div class="card">
-                <h2>Estimated Income</h2>
+                <h2>Estimated Income (Base)</h2>
                 <table>
                     <tr><td>Per Hour</td><td id="hour">$0.00</td></tr>
                     <tr><td>Per Day</td><td id="day">$0.00</td></tr>
@@ -206,9 +121,7 @@
                     <tr><td>1 Avg Parcel</td><td id="valParcel">$0.00 /yr</td></tr>
                     <tr><td>+5% Tier Jump</td><td id="valBadge">$0.00 /yr</td></tr>
                 </table>
-                <p id="roiRecommendation" style="margin-top:20px; font-size:0.95rem; color:#00ff88; text-align:center; font-weight:600; line-height:1.5;">
-                    Analyzing layout...
-                </p>
+                <p id="roiRecommendation" style="margin-top:20px; font-size:0.95rem; color:#00ff88; text-align:center; font-weight:600; line-height:1.5;">Analyzing layout...</p>
             </div>
         </div>
 
@@ -219,69 +132,38 @@
             </div>
 
             <div class="card">
-                <h2>🏆 Milestones</h2>
+                <h2>🚀 The Path to $50/mo</h2>
+                <p style="margin-bottom: 15px; font-size: 0.9rem; opacity: 0.8;">Your strategic roadmap to hitting the big milestone.</p>
                 <table>
-                    <tr><td>$10</td><td id="goal10"></td></tr>
-                    <tr><td>$25</td><td id="goal25"></td></tr>
-                    <tr><td>$50</td><td id="goal50"></td></tr>
-                    <tr><td>$100</td><td id="goal100"></td></tr>
-                    <tr><td>$500</td><td id="goal500"></td></tr>
-                    <tr><td>$1000</td><td id="goal1000"></td></tr>
+                    <tr><td>Current Est. (No Ad Boost)</td><td id="currentMoPath">$0.00</td></tr>
+                    <tr><td>Target</td><td>$50.00</td></tr>
+                    <tr><td>Progress</td><td id="progress50">0%</td></tr>
                 </table>
+                <div class="bar" style="height: 12px; margin: 10px 0;"><div id="bar50" style="height: 100%; width: 0%; background: #00ff88; transition: width 1s;"></div></div>
+                <div style="background: rgba(255, 193, 7, 0.1); border-left: 4px solid #ffc107; padding: 15px; border-radius: 4px; margin-top: 15px;">
+                    <strong style="color: #ffc107; font-size: 1.1rem;">⚠️ Tier Drop Warning:</strong>
+                    <p id="tierWarning" style="font-size: 0.85rem; margin-top: 5px;">You are currently safely within the 15x boost tier.</p>
+                </div>
             </div>
         </div>
 
         <div class="card">
             <h2>Parcel Breakdown</h2>
-            <p>Common</p>
-            <div class="bar"><div class="common" id="commonBar"></div></div>
-            <p>Rare</p>
-            <div class="bar"><div class="rare" id="rareBar"></div></div>
-            <p>Epic</p>
-            <div class="bar"><div class="epic" id="epicBar"></div></div>
-            <p>Legendary</p>
-            <div class="bar"><div class="legendary" id="legendaryBar"></div></div>
+            <p>Common</p><div class="bar"><div class="common" id="commonBar"></div></div>
+            <p>Rare</p><div class="bar"><div class="rare" id="rareBar"></div></div>
+            <p>Epic</p><div class="bar"><div class="epic" id="epicBar"></div></div>
+            <p>Legendary</p><div class="bar"><div class="legendary" id="legendaryBar"></div></div>
         </div>
     </div>
 
     <script>
-        // =======================================
-        // State Management & Logic
-        // =======================================
-        const stats = {
-            currentIncome: 6.19662508,
-            totalRent: 15.19691416,
-            common: 52,
-            rare: 33,
-            epic: 15,
-            legendary: 4,
-            boost: 10
-        };
+        const stats = { currentIncome: 6.19662508, totalRent: 15.19691416, common: 52, rare: 33, epic: 15, legendary: 4, boost: 10 };
+        const rates = { common: 0.0000000011, rare: 0.0000000016, epic: 0.0000000022, legendary: 0.0000000044 };
 
-        const rates = {
-            common: 0.0000000011,
-            rare: 0.0000000016,
-            epic: 0.0000000022,
-            legendary: 0.0000000044
-        };
+        function totalParcels() { return stats.common + stats.rare + stats.epic + stats.legendary; }
+        function rentPerSecond() { return ((stats.common * rates.common) + (stats.rare * rates.rare) + (stats.epic * rates.epic) + (stats.legendary * rates.legendary)) * (1 + (stats.boost / 100)); }
+        function money(value) { return "$" + value.toFixed(8); }
 
-        function totalParcels() {
-            return stats.common + stats.rare + stats.epic + stats.legendary;
-        }
-
-        function rentPerSecond() {
-            let base = (stats.common * rates.common) + 
-                       (stats.rare * rates.rare) + 
-                       (stats.epic * rates.epic) + 
-                       (stats.legendary * rates.legendary);
-            return base * (1 + (stats.boost / 100));
-        }
-
-        function money(value) {
-            return "$" + value.toFixed(8);
-        }
-
-        // --- MANUAL UPDATE LOGIC ---
         function populateInputs() {
             document.getElementById("inpIncome").value = stats.currentIncome.toFixed(8);
             document.getElementById("inpRent").value = stats.totalRent.toFixed(8);
@@ -293,7 +175,6 @@
         }
 
         function saveManualData() {
-            // Grab values from inputs
             let newIncome = parseFloat(document.getElementById("inpIncome").value);
             let newRent = parseFloat(document.getElementById("inpRent").value);
             let newCommon = parseInt(document.getElementById("inpCommon").value);
@@ -302,7 +183,6 @@
             let newLegendary = parseInt(document.getElementById("inpLegendary").value);
             let newBoost = parseInt(document.getElementById("inpBoost").value);
 
-            // Validate and save
             if(!isNaN(newIncome)) stats.currentIncome = newIncome;
             if(!isNaN(newRent)) stats.totalRent = newRent;
             if(!isNaN(newCommon)) stats.common = newCommon;
@@ -311,22 +191,34 @@
             if(!isNaN(newLegendary)) stats.legendary = newLegendary;
             if(!isNaN(newBoost)) stats.boost = newBoost;
 
-            // Trigger visual updates
-            updateNumbers();
-            updateIncome();
-            updateBars();
-            updateDashboard();
-            save();
-            populateInputs(); // Refreshes the boxes with the newly saved static data
+            updateNumbers(); updateIncome(); updateBars(); updateDashboard(); save(); populateInputs();
             showToast("✅ Dashboard Successfully Calibrated!");
         }
 
         function updateIncome() {
             let second = rentPerSecond();
+            let monthly = second * 86400 * 30;
             document.getElementById("hour").innerHTML = money(second * 3600);
             document.getElementById("day").innerHTML = money(second * 86400);
-            document.getElementById("month").innerHTML = money(second * 86400 * 30);
+            document.getElementById("month").innerHTML = money(monthly);
             document.getElementById("year").innerHTML = money(second * 86400 * 365);
+            
+            // Path to $50 Tracking
+            document.getElementById("currentMoPath").innerHTML = money(monthly);
+            let percent = (monthly / 50) * 100;
+            document.getElementById("progress50").innerHTML = percent.toFixed(2) + "%";
+            document.getElementById("bar50").style.width = Math.min(percent, 100) + "%";
+
+            // Tier Warning Engine
+            let total = totalParcels();
+            let warnEl = document.getElementById("tierWarning");
+            if (total < 150) {
+                warnEl.innerHTML = `You are at ${total} parcels. Your 15x multiplier drops to 10x at 151 parcels. Stop buying at 150 and save AB to jump the next tier!`;
+            } else if (total === 150) {
+                warnEl.innerHTML = `⚠️ DANGER ZONE: You are at exactly 150 parcels. Do not buy parcel #151 or your multiplier will drop. Save AB to jump directly to the end of the next tier.`;
+            } else {
+                warnEl.innerHTML = `You have crossed the threshold into a lower multiplier tier. Keep farming AB to climb to the next break-even point.`;
+            }
         }
 
         function updateBars() {
@@ -372,17 +264,10 @@
             document.getElementById("legendary").innerHTML = stats.legendary;
             document.getElementById("boostDisplay").innerHTML = stats.boost + "%";
             updateStrategy();
-            // populateInputs() has been removed from here so you can type freely!
         }
 
-        function save() {
-            localStorage.setItem("atlasDashboard", JSON.stringify(stats));
-        }
-
-        function load() {
-            let saved = localStorage.getItem("atlasDashboard");
-            if(saved) Object.assign(stats, JSON.parse(saved));
-        }
+        function save() { localStorage.setItem("atlasDashboard", JSON.stringify(stats)); }
+        function load() { let saved = localStorage.getItem("atlasDashboard"); if(saved) Object.assign(stats, JSON.parse(saved)); }
 
         function formatTime(seconds) {
             if(seconds <= 0) return "Complete";
@@ -396,18 +281,9 @@
             const second = rentPerSecond();
             document.getElementById("rentSecond").innerHTML = money(second);
             document.getElementById("dailyEarnings").innerHTML = money(second * 86400);
-            
-            const goals = [10, 25, 50, 100, 500, 1000];
-            goals.forEach(goal => {
-                const el = document.getElementById("goal" + goal);
-                if(!el) return;
-                const remaining = goal - stats.currentIncome;
-                el.innerHTML = remaining <= 0 ? "✅ Reached" : formatTime(remaining / second);
-            });
-
             const next = document.getElementById("nextTen");
             if(next) {
-                const remain = 10 - stats.currentIncome;
+                const remain = 10 - (stats.currentIncome % 10);
                 next.innerHTML = remain <= 0 ? "Reached" : formatTime(remain / second);
             }
         }
@@ -415,9 +291,7 @@
         function liveCounter() {
             stats.currentIncome += rentPerSecond();
             stats.totalRent += rentPerSecond();
-            updateNumbers();
-            updateDashboard();
-            save();
+            updateNumbers(); updateDashboard(); save();
         }
 
         function showToast(msg) {
@@ -428,16 +302,9 @@
             setTimeout(() => toast.remove(), 3500);
         }
 
-        // =======================================
-        // Chart.js Setup
-        // =======================================
         let earningsHistory = JSON.parse(localStorage.getItem("earningsHistory")) || [];
-
         function saveHistory() {
-            earningsHistory.push({
-                date: new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}),
-                income: stats.currentIncome
-            });
+            earningsHistory.push({ date: new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}), income: stats.currentIncome });
             if(earningsHistory.length > 20) earningsHistory.shift();
             localStorage.setItem("earningsHistory", JSON.stringify(earningsHistory));
         }
@@ -445,43 +312,15 @@
         const ctx = document.getElementById("earningsChart");
         const chart = new Chart(ctx, {
             type: "line",
-            data: {
-                labels: earningsHistory.map(x => x.date),
-                datasets: [{
-                    label: "Live Income",
-                    data: earningsHistory.map(x => x.income),
-                    tension: .35,
-                    fill: true,
-                    borderColor: '#00ff88',
-                    backgroundColor: 'rgba(0, 255, 136, 0.1)',
-                    borderWidth: 3
-                }]
-            },
-            options: {
-                responsive: true,
-                plugins: { legend: { labels: { color: "white" } } },
-                scales: {
-                    x: { ticks: { color: "white", maxTicksLimit: 6 } },
-                    y: { ticks: { color: "white" } }
-                }
-            }
+            data: { labels: earningsHistory.map(x => x.date), datasets: [{ label: "Live Income", data: earningsHistory.map(x => x.income), tension: .35, fill: true, borderColor: '#00ff88', backgroundColor: 'rgba(0, 255, 136, 0.1)', borderWidth: 3 }] },
+            options: { responsive: true, plugins: { legend: { labels: { color: "white" } } }, scales: { x: { ticks: { color: "white", maxTicksLimit: 6 } }, y: { ticks: { color: "white" } } } }
         });
 
         setInterval(() => {
-            saveHistory();
-            chart.data.labels = earningsHistory.map(x => x.date);
-            chart.data.datasets[0].data = earningsHistory.map(x => x.income);
-            chart.update();
+            saveHistory(); chart.data.labels = earningsHistory.map(x => x.date); chart.data.datasets[0].data = earningsHistory.map(x => x.income); chart.update();
         }, 60000);
 
-        // Initialize App
-        load();
-        populateInputs(); // Fills the boxes with your saved data on first load
-        updateNumbers();
-        updateIncome();
-        updateBars();
-        updateDashboard();
-        setInterval(liveCounter, 1000);
+        load(); populateInputs(); updateNumbers(); updateIncome(); updateBars(); updateDashboard(); setInterval(liveCounter, 1000);
     </script>
 </body>
 </html>
