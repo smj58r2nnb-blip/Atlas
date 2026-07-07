@@ -114,7 +114,6 @@
     </header>
 
     <div class="container">
-        <!-- Profile -->
         <div class="glass profile">
             <img id="avatar" src="https://placehold.co/150x150/1e293b/00ff88?text=AE" alt="Avatar">
             <div>
@@ -134,7 +133,6 @@
             <div class="glass"><h3>Total Rent Accrued</h3><h1 id="rent" style="font-size: 2.8rem; color: #a0aec0;">$15.15226684</h1></div>
         </div>
 
-        <!-- CONTROL PANEL -->
         <div class="glass">
             <h2>⚙️ System Calibration</h2>
             <p style="font-size: 0.9rem; color: #a0aec0;">Input your latest in-game metrics to sync the analytics engine.</p>
@@ -152,7 +150,6 @@
         </div>
 
         <div class="cards">
-            <!-- DAILY AB TRACKER -->
             <div class="glass">
                 <h2>💎 Atlas Bank Vault</h2>
                 <p style="margin-bottom: 15px; font-size: 0.9rem; color: #a0aec0;">Your daily AB accumulation & velocity.</p>
@@ -163,12 +160,10 @@
                         <tr><th>Date</th><th>Total Bank</th><th>Velocity</th></tr>
                     </thead>
                     <tbody id="abHistoryList">
-                        <!-- JS populated -->
-                    </tbody>
+                        </tbody>
                 </table>
             </div>
 
-            <!-- PARCEL STATS -->
             <div class="glass">
                 <h2>Portfolio Breakdown</h2>
                 <table>
@@ -208,7 +203,6 @@
         <div class="cards">
             <div class="glass full-width">
                 <h2>📈 Live Revenue Stream</h2>
-                <!-- Fixed Height Wrapper to prevent chart explosion -->
                 <div style="position: relative; height: 250px; width: 100%;">
                     <canvas id="earningsChart"></canvas>
                 </div>
@@ -400,8 +394,11 @@
             let parcelsNeeded = badgeGainYear / parcelGainYear;
 
             let recHTML = `A 5% Badge jump yields the exact same yearly rent as buying <b>${parcelsNeeded.toFixed(1)} average parcels.</b><br><br>`;
-            if (total >= 150 && total < 220) {
-                recHTML += "<span style='color:#ffc107'>⚠️ You are at the 150 parcel tier drop! Save AB to jump straight to 220.</span>";
+            
+            const ukLimits = [60, 100, 150, 180, 220, 250, 300, 350, 450];
+            
+            if (ukLimits.includes(total)) {
+                recHTML += "<span style='color:#ffc107'>⚠️ You are exactly at a tier limit! Save AB to jump the next bracket.</span>";
             } else if (parcelsNeeded > 20) {
                 recHTML += "<span style='color:#00ff88'>⭐ ACQUIRE BADGES: A tier jump is mathematically superior to acquiring land right now.</span>";
             } else {
@@ -450,19 +447,27 @@
             let elBar = document.getElementById("bar50");
             if (elBar) elBar.style.width = percent + "%";
 
-            // UK Tier Warning Engine
+            // NEW UK Tier Warning Engine calibrated to exact International Drops
             let warnEl = document.getElementById("tierWarning");
             if (warnEl) {
                 if (total < 60) {
-                    warnEl.innerHTML = `Current multiplier: <b>20x</b>. Drops to <b>15x</b> at 61 parcels. Stop buying at exactly 60 and stockpile AB to jump into the next bracket.`;
+                    warnEl.innerHTML = `Current multiplier: <b>20x</b>. Drops to <b>15x</b> at 61 parcels.<br><br>Stop buying at exactly 60 and stockpile AB to jump into the next bracket.`;
                 } else if (total === 60) {
-                    warnEl.innerHTML = `<b>CRITICAL:</b> You are exactly at the 60 parcel limit. Do not acquire parcel #61! Hoard AB to execute a tier jump.`;
+                    warnEl.innerHTML = `<b>CRITICAL LIMIT:</b> You are exactly at the 60 parcel boundary. Do not acquire parcel #61! Hoard AB to execute a tier jump.`;
+                } else if (total < 100) {
+                    warnEl.innerHTML = `Current multiplier: <b>15x</b>. Drops to <b>10x</b> at 101 parcels.<br><br>Stop buying at exactly 100 and save ~5,000 AB to safely jump to the 150 limit.`;
+                } else if (total === 100) {
+                    warnEl.innerHTML = `<b>CRITICAL LIMIT:</b> You are exactly at the 100 parcel boundary. Do not acquire parcel #101! Save ~5,000 AB to execute a tier jump to 150.`;
                 } else if (total < 150) {
-                    warnEl.innerHTML = `Current multiplier: <b>15x</b>. Drops to <b>10x</b> at 151 parcels. Stop buying at exactly 150 and save ~7,000 AB to safely jump to the 220 limit.`;
+                    warnEl.innerHTML = `Current multiplier: <b>10x</b>. Drops to <b>8x</b> at 151 parcels.<br><br>Stop buying at exactly 150 and save ~3,000 AB to safely jump to the 180 limit.`;
                 } else if (total === 150) {
-                    warnEl.innerHTML = `<b>CRITICAL:</b> You are exactly at the 150 parcel limit. Do not acquire parcel #151! Save ~7,000 AB to execute a tier jump to 220.`;
+                    warnEl.innerHTML = `<b>CRITICAL LIMIT:</b> You are exactly at the 150 parcel boundary. Do not acquire parcel #151! Save ~3,000 AB to execute a tier jump to 180.`;
+                } else if (total < 180) {
+                    warnEl.innerHTML = `Current multiplier: <b>8x</b>. Drops to <b>7x</b> at 181 parcels.<br><br>Stop buying at exactly 180 and stockpile AB to jump to the 220 limit.`;
+                } else if (total === 180) {
+                    warnEl.innerHTML = `<b>CRITICAL LIMIT:</b> You are exactly at the 180 parcel boundary. Do not acquire parcel #181! Hoard AB to execute a tier jump.`;
                 } else {
-                    warnEl.innerHTML = `You have cleared the 150 tier threshold. Maintain AB velocity and climb toward the 1,500 target.`;
+                    warnEl.innerHTML = `You are navigating the upper international tiers. Check your tier chart for the next drop and maintain your AB velocity!`;
                 }
             }
         }
